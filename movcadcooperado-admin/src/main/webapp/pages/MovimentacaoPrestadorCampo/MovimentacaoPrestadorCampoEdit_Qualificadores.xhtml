@@ -1,0 +1,79 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<!-- Tab Dados prestador -->
+	<p:tab id="dadosQualificadores"
+		title="#{msg['movimentacao.prestador.campo.dadosQualificadores']}">
+
+		<p:panel
+			header="#{msg['movimentacao.prestador.campo.dadosQualificadores']}">
+
+			<p:dataTable rows="12" id="tabelaQualificadores"
+				style="margin-top:1%" reflow="true"
+				emptyMessage="#{msg['informativo.nenhum.resultado']}"
+				value="#{movimentacaoPrestadorCampoBean.camposPrestadorQualificadoresList}"
+				paginator="true" paginatorPosition="bottom" var="_qualificadores">
+
+				<!-- CAMPO -->
+				<p:column styleClass="alignLeft"
+					headerText="#{msg['movimentacao.prestador.campo.campo']}"
+					colspan="2">
+					<h:outputText value="#{_qualificadores.campoNome}" />
+				</p:column>
+
+				<!-- LEGENDA -->
+				<p:column styleClass="alignLeft"
+					headerText="#{msg['movimentacao.prestador.campo.legenda']}"
+					colspan="3">
+					<h:outputText value="#{_qualificadores.legenda}" />
+				</p:column>
+
+				<!-- ANEXO -->
+				<p:column headerText="#{msg['movimentacao.prestador.campo.anexo']}">
+					<p:selectBooleanCheckbox id="campoQualificadoresAnexo"
+						value="#{_qualificadores.anexo}" disabled="true" />
+				</p:column>
+
+				<!-- ANALISE -->
+				<p:column
+					headerText="#{msg['movimentacao.prestador.campo.analise']}">
+					<p:selectBooleanCheckbox id="campoQualificadoresAnalise"
+						value="#{_qualificadores.analise}" disabled="true" />
+				</p:column>
+
+				<!-- OBRIGATORIO -->
+				<p:column
+					headerText="#{msg['movimentacao.prestador.campo.obrigatorio']}">
+					<p:selectBooleanCheckbox id="campoQualificadoresObrigatorio"
+						value="#{_qualificadores.obrigatorio}" disabled="true" />
+				</p:column>
+
+				<!-- DESATIVAR -->
+				<p:column
+					headerText="#{msg['movimentacao.prestador.campo.desativar']}">
+					<p:selectBooleanCheckbox id="campoQualificadoresDesativar"
+						value="#{_qualificadores.disable}" disabled="true" />
+				</p:column>
+
+				<!-- AÇÕES -->
+				<p:column headerText="#{msg['label.acao']}" colspan="1">
+
+					<!-- EDITAR -->
+					<p:commandButton icon="fa fa-fw fa-edit"
+						rendered="#{not empty movimentacaoPrestadorCampoBean.camposPrestadorQualificadoresList}"
+						oncomplete="PF('campoDialog').show();" update=":formDialogCampos">
+						<f:setPropertyActionListener
+							target="#{movimentacaoPrestadorCampoBean.movimentacaoPrestadorCampo}"
+							value="#{_qualificadores}" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+		</p:panel>
+	</p:tab>
+</ui:composition>

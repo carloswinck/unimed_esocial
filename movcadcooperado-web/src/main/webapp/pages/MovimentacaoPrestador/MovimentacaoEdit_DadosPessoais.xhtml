@@ -1,0 +1,621 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<!-- TAB DE DADOS PESSOAIS -->
+	<p:tab id="dadosPessoais"
+		title="#{msg['movimentacao.prestador.dadosPessoais']}"
+		titleStyleClass="tabAlign">
+		<p:panel header="#{msg['movimentacao.prestador.dadosPessoais']}">
+
+			<p:panelGrid columns="3" layout="grid" style="text-align:left">
+
+				<!-- CÓDIGO DA UNIMED -->
+				<h:panelGrid>
+					<p:outputLabel for="codigoUnimed"
+						value="#{msg['movimentacaoPrestador.codigoPrestador']}" />
+					<p:inputText id="codigoUnimed" required="false" maxlength="17"
+						disabled="true"
+						value="#{movimentacaoPrestadorBean.editEntity.codigoPrestador}">
+						<pe:keyFilter regEx="/[\d]/" />
+					</p:inputText>
+					<p:message for="codigoUnimed" display="text" />
+				</h:panelGrid>
+
+				<!-- NOME COMPLETO -->
+				<h:panelGrid style="width:100% !important;">
+					<p:outputLabel for="nomeCompleto"
+						value="#{msg['movimentacaoPrestador.nomePrestador']}" />
+					<p:inputText id="nomeCompleto"
+						title="#{msg['movimentacaoPrestador.nomePrestador.msg']}"
+						validator="nomeValidator"
+						disabled="#{movimentacaoPrestadorBean.isDisable('NOME')}"
+						required="#{movimentacaoPrestadorBean.isRequired('NOME')}"
+						style="width:100% !important;" maxlength="70"
+						value="#{movimentacaoPrestadorBean.editEntity.nomePrestador}"
+						onchange="converteMaiuscula(this)">
+						<f:validateLength minimum="1" maximum="70" />
+						<pe:keyFilter regEx="/[A-ZzÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]/i" />
+						<p:ajax partialSubmit="true" global="false"
+							update="@parent:@parent" event="change" />
+						<o:validateMultiple id="validateNomes"
+							components="nomeCompleto nomeMae nomePai"
+							validator="#{comparaNomesValidator}" />
+					</p:inputText>
+					<p:message for="nomeCompleto" display="text" />
+				</h:panelGrid>
+
+				<!-- CPF -->
+				<h:panelGrid>
+					<p:outputLabel for="cpf"
+						value="#{msg['movimentacaoPrestador.cpfPrestador']}" />
+					<p:inputMask id="cpf" disabled="true"
+						value="#{movimentacaoPrestadorBean.editEntity.cpfPrestador}"
+						style="width:25%; min-width:110px " mask="999.999.999-99" />
+					<p:message for="cpf" display="text" />
+				</h:panelGrid>
+
+				<!-- DATA DE NASCIMENTO -->
+				<h:panelGrid>
+					<p:outputLabel for="dataNascimento"
+						value="#{msg['movimentacaoPrestador.dataNascimento']}" />
+					<p:calendar id="dataNascimento" mindate="1/1/1900" maxdate="#{now}"
+						yearRange="-116:" mask="true"
+						disabled="#{movimentacaoPrestadorBean.isDisable('DATANASCIMENTO')}"
+						required="#{movimentacaoPrestadorBean.isRequired('DATANASCIMENTO')}"
+						validator="dataFuturaValidator"
+						value="#{movimentacaoPrestadorBean.editEntity.dataNascimento}"
+						showOn="button" navigator="true" pattern="dd/MM/yyyy">
+						<p:ajax event="change"
+							update="@this,dataNascimentoMsg,dataEmissaoCNH, gridDataInscricaoCRM,gridDataExpedicaoRG, gridDataPrimeirarHabilit, dataChegada"
+							partialSubmit="true" />
+						<p:ajax event="dateSelect"
+							update="@parent,@this,dataEmissaoCNH,dataNascimentoMsg,gridDataInscricaoCRM, gridDataPrimeirarHabilit, dataChegada, gridDataExpedicaoRG"
+							partialSubmit="true" />
+					</p:calendar>
+					<p:message id="dataNascimentoMsg" for="dataNascimento"
+						display="text" />
+				</h:panelGrid>
+
+				<!-- NACIONALIDADE -->
+				<h:panelGrid style="text-align:left">
+					<p:outputLabel for="nacionalidade"
+						value="#{msg['movimentacaoPrestador.nacionalidade']}" />
+					<p:selectOneMenu id="nacionalidade"
+						disabled="#{movimentacaoPrestadorBean.isDisable('NACIONALIDADE')}"
+						required="#{movimentacaoPrestadorBean.isRequired('NACIONALIDADE')}"
+						converter="#{vEntityConverter}"
+						value="#{movimentacaoPrestadorBean.editEntity.nacionalidade}">
+						<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+							noSelectionOption="true" />
+						<f:selectItems
+							value="#{movimentacaoPrestadorBean.getPaisesList()}" var="e"
+							itemLabel="#{e.nome}" />
+						<p:ajax partialSubmit="true" global="false"
+							update="condicaoRNE, dataChegada, dataExpedicaoRNE, orgaoEmissorRNE, numeroRNE, filhosBrasileiros, casadoComBrasileiro, 
+												gridEstadoNatural, gridNaturalidade, gridRG,gridDataExpedicaoRG, gridOrgaoEmissor, gridEstadoOrgaoEmissorRG"
+							event="change"
+							listener="#{movimentacaoPrestadorBean.limpaEstadoMunicipioNatual()}" />
+						<p:ajax partialSubmit="true" global="false"
+							update="gridOrgaoEmissor" event="change"
+							listener="#{movimentacaoPrestadorBean.onChangeNacionalidade()}" />
+					</p:selectOneMenu>
+					<p:message for="nacionalidade" display="text" />
+				</h:panelGrid>
+
+				<!-- RG -->
+				<h:panelGrid id="gridRG">
+					<p:outputLabel for="rg"
+						value="#{msg['movimentacaoPrestador.numeroRG']}" />
+					<p:inputText id="rg"
+						disabled="#{movimentacaoPrestadorBean.editEntity.nacionalidade.nome ne 'Brasil' or movimentacaoPrestadorBean.isDisable('RG')}"
+						required="#{movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' and movimentacaoPrestadorBean.isRequired('RG')}"
+						maxlength="14" validator="rGValidator"
+						value="#{movimentacaoPrestadorBean.editEntity.numeroRG}"
+						style="width:25%; min-width:110px;">
+						<f:validateLength minimum="3" maximum="14" />
+						<p:ajax event="change" global="false" partialSubmit="true"
+							listener="#{movimentacaoPrestadorBean.onChangeNacionalidade()}"
+							update="@parent, gridOrgaoEmissor, gridDataExpedicaoRG,gridEstadoOrgaoEmissorRG" />
+						<pe:keyFilter regEx="/[A-Z0-9]/i" />
+					</p:inputText>
+					<p:message id="rgMsg" for="rg" display="text" />
+				</h:panelGrid>
+
+				<!-- DATA DE EXPEDIÇÃO RG -->
+				<h:panelGrid id="gridDataExpedicaoRG">
+					<p:outputLabel for="dataExpedicaoRG"
+						value="#{msg['movimentacaoPrestador.dataExpedicaoRG']}" />
+					<p:calendar id="dataExpedicaoRG"
+						mindate="#{movimentacaoPrestadorBean.editEntity.dataNascimento}"
+						maxdate="#{now}" 
+						showOn="button"
+						disabled="#{movimentacaoPrestadorBean.habilitaCamposReferenteRG() or movimentacaoPrestadorBean.estrangeiro and movimentacaoPrestadorBean.isDisable('DATAEXPEDICAORG')}"
+						required="#{movimentacaoPrestadorBean.estrangeiro and movimentacaoPrestadorBean.isRequired('DATAEXPEDICAORG')}"
+						mask="true" yearRange="-116: " validator="dataFuturaValidator"
+						value="#{movimentacaoPrestadorBean.editEntity.dataExpedicaoRG}"
+						navigator="true" pattern="dd/MM/yyyy">
+						<p:ajax partialSubmit="true" global="false" event="change"
+							update="@parent" />
+						<p:ajax partialSubmit="true" global="false" event="dateSelect"
+							update="@parent" />
+						<o:validateOrder id="orderExpedicaoRG"
+							components="dataNascimento dataExpedicaoRG"
+							message="#{msg['informativo.dataInvalida']}"
+							showMessageFor="dataExpedicaoRG" />
+					</p:calendar>
+					<p:message for="dataExpedicaoRG" display="text" />
+				</h:panelGrid>
+
+				<!-- ÓRGÃO EMISSOR -->
+				<h:panelGrid id="gridOrgaoEmissor">
+					<p:outputLabel for="orgaoEmissor"
+						value="#{msg['movimentacaoPrestador.orgaoEmissorRG']}" />
+					<p:inputText id="orgaoEmissor" disabled="true"
+						style="width:20%; min-width:50px"
+						required="#{movimentacaoPrestadorBean.estrangeiro and movimentacaoPrestadorBean.isRequired('ORGAOEMISSOR')}"
+						value="#{movimentacaoPrestadorBean.editEntity.orgaoEmissorRG}">
+						<f:validateLength minimum="3" maximum="6" />
+					</p:inputText>
+					<p:message for="orgaoEmissor" display="text" />
+				</h:panelGrid>
+
+				<!-- NÃO É PARAMETRIZADO PELO ADMIN, POIS NÃO TEM CAMPO NA SAM_PRESTADOR -->
+				<!-- ESTADO ÓRGÃO EMISSOR RG -->
+				<h:panelGrid style="text-align:left" id="gridEstadoOrgaoEmissorRG">
+					<p:outputLabel for="estadoOrgaoEmissorRG"
+						value="#{msg['movimentacaoPrestador.estadoOrgaoEmissorRG']}" />
+					<p:selectOneMenu id="estadoOrgaoEmissorRG"
+						required="#{movimentacaoPrestadorBean.estrangeiro}"
+						disabled="#{movimentacaoPrestadorBean.habilitaCamposReferenteRG()}"
+						value="#{movimentacaoPrestadorBean.editEntity.estadoOrgaoEmissorRG}">
+						<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+							noSelectionOption="true" />
+						<f:selectItems value="#{movimentacaoPrestadorBean.estadosRG}"
+							var="e" itemLabel="#{e.sgUfIbge}" />
+						<p:ajax partialSubmit="true" event="change" global="false"
+							update="@parent" />
+					</p:selectOneMenu>
+					<p:message for="estadoOrgaoEmissorRG" display="text" />
+				</h:panelGrid>
+
+				<!-- ESTADO -->
+				<h:panelGrid id="gridEstadoNatural">
+					<p:outputLabel for="estado"
+						value="#{msg['movimentacaoPrestador.estado']}" />
+					<p:selectOneMenu id="estado"
+						title="#{msg['movimentacaoPrestador.estado.msg']}"
+						required="#{movimentacaoPrestadorBean.isRequired('ESTADO')}"
+						disabled="#{not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? false:true or movimentacaoPrestadorBean.isDisable('ESTADO')}"
+						converter="#{vEntityConverter}"
+						value="#{movimentacaoPrestadorBean.editEntity.estado}">
+						<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+							noSelectionOption="true" />
+						<f:selectItems value="#{movimentacaoPrestadorBean.estadosList}"
+							var="e" itemLabel="#{e.sigla}" />
+						<p:ajax event="change" partialSubmit="true"
+							update="@parent, naturalidade" />
+					</p:selectOneMenu>
+					<p:message for="estado" display="text" />
+				</h:panelGrid>
+
+				<!-- NATURALIDADE -->
+				<h:panelGrid id="gridNaturalidade">
+					<p:outputLabel for="naturalidade"
+						value="#{msg['movimentacaoPrestador.naturalidade']}" />
+					<p:selectOneMenu id="naturalidade"
+						title="#{msg['movimentacaoPrestador.naturalidade.msg']}"
+						required="#{movimentacaoPrestadorBean.isRequired('NATURALIDADE')}"
+						disabled="#{not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? false:true or movimentacaoPrestadorBean.isDisable('NATURALIDADE')}"
+						converter="#{vEntityConverter}"
+						value="#{movimentacaoPrestadorBean.editEntity.naturalidade}"
+						filter="true" filterMatchMode="startsWith">
+						<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+							noSelectionOption="true" />
+						<f:selectItems
+							value="#{movimentacaoPrestadorBean.getMunicipiosEstado(movimentacaoPrestadorBean.editEntity.estado)}"
+							var="e" itemLabel="#{e.nome}" />
+					</p:selectOneMenu>
+					<p:message for="naturalidade" display="text" />
+				</h:panelGrid>
+
+				<!-- ESTADO CIVIL -->
+				<h:panelGrid>
+					<p:outputLabel for="estadoCivil"
+						value="#{msg['movimentacaoPrestador.estadoCivil']}" />
+					<p:selectOneMenu id="estadoCivil"
+						disabled="#{movimentacaoPrestadorBean.isDisable('ESTADOCIVIL')}"
+						required="#{movimentacaoPrestadorBean.isRequired('ESTADOCIVIL')}"
+						converter="#{vEntityConverter}"
+						value="#{movimentacaoPrestadorBean.editEntity.estadoCivil}">
+						<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+							noSelectionOption="true" />
+						<f:selectItems
+							value="#{movimentacaoPrestadorBean.estadoCivilList}" var="e"
+							itemLabel="#{e.descricao}" />
+					</p:selectOneMenu>
+					<p:message for="estadoCivil" display="text" />
+				</h:panelGrid>
+
+				<!-- NOME MÃE -->
+				<h:panelGrid style="width:100% !important;">
+					<p:outputLabel for="nomeMae"
+						value="#{msg['movimentacaoPrestador.nomeMae']}" />
+					<p:inputText id="nomeMae"
+						disabled="#{movimentacaoPrestadorBean.isDisable('NOMEMAE')}"
+						required="#{movimentacaoPrestadorBean.isRequired('NOMEMAE')}"
+						title="#{msg['movimentacaoPrestador.nomeMae.msg']}"
+						style="width:100% !important;" maxlength="70"
+						onchange="converteMaiuscula(this)" validator="nomeValidator"
+						value="#{movimentacaoPrestadorBean.editEntity.nomeMae}">
+						<pe:keyFilter regEx="/[A-ZzÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]/i" />
+						<f:validateLength minimum="1" maximum="70" />
+						<p:ajax partialSubmit="true" global="false" event="change" />
+					</p:inputText>
+					<p:message for="nomeMae" display="text" />
+				</h:panelGrid>
+
+				<!-- NOME PAI -->
+				<h:panelGrid style="width:100% !important;">
+					<p:outputLabel for="nomePai"
+						value="#{msg['movimentacaoPrestador.nomePai']}" />
+					<p:inputText id="nomePai"
+						disabled="#{movimentacaoPrestadorBean.isDisable('NOMEPAI')}"
+						required="#{movimentacaoPrestadorBean.isRequired('NOMEPAI')}"
+						title="#{msg['movimentacaoPrestador.nomePai.msg']}"
+						onchange="converteMaiuscula(this)" style="width:100% !important;"
+						maxlength="70" validator="nomeValidator"
+						value="#{movimentacaoPrestadorBean.editEntity.nomePai}">
+						<pe:keyFilter regEx="/[A-ZzÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]/i" />
+						<p:ajax partialSubmit="true" global="false" event="change" />
+					</p:inputText>
+					<p:message for="nomePai" display="text" />
+				</h:panelGrid>
+
+				<!-- RAÇA E COR -->
+				<h:panelGrid>
+					<p:outputLabel for="racaCor"
+						value="#{msg['movimentacaoPrestador.racaCor']}" />
+					<p:selectOneMenu id="racaCor"
+						disabled="#{movimentacaoPrestadorBean.isDisable('RACAECOR')}"
+						required="#{movimentacaoPrestadorBean.isRequired('RACAECOR')}"
+						value="#{movimentacaoPrestadorBean.editEntity.racaCor}">
+						<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+							noSelectionOption="true" />
+						<f:selectItems
+							value="#{movimentacaoPrestadorBean.racaCorEnumList()}" var="e"
+							itemLabel="#{e.descricao}" />
+					</p:selectOneMenu>
+					<p:message for="racaCor" display="text" />
+				</h:panelGrid>
+
+				<!-- NUMERO CRM -->
+				<h:panelGrid>
+					<p:outputLabel for="crm"
+						value="#{msg['movimentacaoPrestador.inscricaoCRM']}" />
+					<p:inputText id="crm" style="width:70px" maxlength="6"
+						disabled="#{movimentacaoPrestadorBean.isDisable('INSCRICAOCR')}"
+						required="#{movimentacaoPrestadorBean.isRequired('INSCRICAOCR')}"
+						value="#{movimentacaoPrestadorBean.editEntity.inscricaoCRM}">
+						<pe:keyFilter regEx="/[\d]/" />
+						<f:validateLength minimum="1" maximum="6" />
+					</p:inputText>
+					<p:message for="crm" display="text" style="text-align:left;" />
+				</h:panelGrid>
+
+				<!-- CONSELHO REGIONAL -->
+				<h:panelGrid style="width: 100%">
+					<p:outputLabel for="conselhoRegional"
+						value="#{msg['movimentacaoPrestador.conselhoRegional']}" />
+					<p:inputText id="conselhoRegional"
+						disabled="#{movimentacaoPrestadorBean.isDisable('CONSELHOREGIONAL')}"
+						required="#{movimentacaoPrestadorBean.isRequired('CONSELHOREGIONAL')}"
+						style="width:15% !important; min-width: 30px" maxlength="3"
+						value="#{movimentacaoPrestadorBean.editEntity.conselhoRegional eq null ? '' : movimentacaoPrestadorBean.editEntity.conselhoRegional.sigla}">
+						<f:validateLength minimum="1" maximum="3" />
+					</p:inputText>
+					<p:message for="conselhoRegional" display="text"
+						style="text-align:left;" />
+				</h:panelGrid>
+
+				<!-- DATA DE INSCRIÇÃO CRM -->
+				<h:panelGrid id="gridDataInscricaoCRM">
+					<p:outputLabel for="dataInscricaoCRM"
+						value="#{msg['movimentacaoPrestador.dataInscricaoCRM']}" />
+					<p:calendar id="dataInscricaoCRM"
+						mindate="#{movimentacaoPrestadorBean.editEntity.dataNascimento}"
+						showOn="button" maxdate="#{now}"
+						disabled="#{movimentacaoPrestadorBean.isDisable('DATAINSCRICAOCR')}"
+						required="#{movimentacaoPrestadorBean.isRequired('DATAINSCRICAOCR')}"
+						mask="true" yearRange="-116: " validator="dataFuturaValidator"
+						value="#{movimentacaoPrestadorBean.editEntity.dataInscricaoCRM}"
+						navigator="true" pattern="dd/MM/yyyy">
+						<o:validateOrder id="orderDataInscricaoCRM"
+							components="dataNascimento dataInscricaoCRM"
+							message="#{msg['informativo.dataInvalida']}"
+							showMessageFor="dataInscricaoCRM" />
+						<p:ajax partialSubmit="true" event="change"
+							update="gridDataInscricaoCRM" />
+					</p:calendar>
+					<p:message for="dataInscricaoCRM" display="text" />
+				</h:panelGrid>
+
+				<!-- INSCRIÇÃO INSS -->
+				<h:panelGrid>
+					<p:outputLabel for="inscricaoINSS"
+						value="#{msg['movimentacaoPrestador.inscricaoINSS']}" />
+					<p:inputText id="inscricaoINSS" style="width:65%;" maxlength="11"
+						disabled="#{movimentacaoPrestadorBean.isDisable('INSCRICAOINSS')}"
+						required="#{movimentacaoPrestadorBean.isRequired('INSCRICAOINSS')}"
+						validator="inscricaoValidator"
+						title="#{msg['movimentacaoPrestador.inscricaoINSS.msg']}"
+						value="#{movimentacaoPrestadorBean.editEntity.inscricaoINSS}">
+						<pe:keyFilter regEx="/[\d]/" />
+					</p:inputText>
+					<p:message for="inscricaoINSS" display="text"
+						style="text-align:left;" />
+				</h:panelGrid>
+
+				<!-- INSCRIÇÃO MUNICIPAL(contida no alvará) -->
+				<h:panelGrid style="text-align:left">
+					<p:outputLabel for="inscricaoAlvara"
+						value="#{msg['movimentacaoPrestador.inscricaoMunicipal']}" />
+					<p:inputText id="inscricaoAlvara" style="width:65%;"
+						title="#{msg['movimentacaoPrestador.inscricaoMunicipal.msg']}"
+						maxlength="13"
+						disabled="#{movimentacaoPrestadorBean.isDisable('INSCRICAOMUNICIPAL')}"
+						required="#{movimentacaoPrestadorBean.isRequired('INSCRICAOMUNICIPAL')}"
+						value="#{movimentacaoPrestadorBean.editEntity.inscricaoMunicipal}">
+						<f:validateLength minimum="1" maximum="13" />
+						<pe:keyFilter regEx="/[\d]/" />
+						<p:ajax partialSubmit="true"
+							update="@this,gridEstadoPagamento, gridMunicipioPagamento"
+							event="change" />
+					</p:inputText>
+					<p:message for="inscricaoAlvara" display="text"
+						style="text-align:left;" />
+				</h:panelGrid>
+
+				<!-- ESTADO PAGAMENTO -->
+				<h:panelGrid style="text-align:left" id="gridEstadoPagamento">
+					<p:outputLabel for="estadoPagamento"
+						value="#{msg['movimentacaoPrestador.estadoPagamento']}" />
+					<p:selectOneMenu id="estadoPagamento"
+						converter="#{vEntityConverter}"
+						disabled="#{movimentacaoPrestadorBean.isDisable('ESTADOPAGAMENTO')}"
+						required="#{movimentacaoPrestadorBean.isRequired('ESTADOPAGAMENTO')}"
+						value="#{movimentacaoPrestadorBean.editEntity.estadoPagamento}">
+						<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+							noSelectionOption="true" />
+						<f:selectItems value="#{movimentacaoPrestadorBean.estadosList}"
+							var="e" itemLabel="#{e.sigla}" />
+						<p:ajax event="change" partialSubmit="true"
+							update="@parent, municipioPagamento" />
+					</p:selectOneMenu>
+					<p:message for="estadoPagamento" display="text" />
+				</h:panelGrid>
+
+				<!-- MUNICIPIO PAGAMENTO -->
+				<h:panelGrid style="text-align:left" id="gridMunicipioPagamento">
+					<p:outputLabel for="municipioPagamento"
+						value="#{msg['movimentacaoPrestador.municipioPagamento']}" />
+					<p:selectOneMenu id="municipioPagamento"
+						converter="#{vEntityConverter}"
+						disabled="#{movimentacaoPrestadorBean.isDisable('MUNICIPIOPAGAMENTO')}"
+						required="#{movimentacaoPrestadorBean.isRequired('MUNICIPIOPAGAMENTO')}"
+						value="#{movimentacaoPrestadorBean.editEntity.municipioPagamento}">
+						<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+							noSelectionOption="true" />
+						<f:selectItems
+							value="#{movimentacaoPrestadorBean.getMunicipiosEstado(movimentacaoPrestadorBean.editEntity.estadoPagamento)}"
+							var="e" itemLabel="#{e.nome}" />
+					</p:selectOneMenu>
+					<p:message for="municipioPagamento" display="text" />
+				</h:panelGrid>
+
+				<!-- SEXO  -->
+				<h:panelGrid style="text-align:left">
+					<p:outputLabel for="sexo"
+						value="#{msg['movimentacaoPrestador.sexo']}" />
+					<p:selectOneMenu id="sexo"
+						disabled="#{movimentacaoPrestadorBean.isDisable('SEXO')}"
+						required="#{movimentacaoPrestadorBean.isRequired('SEXO')}"
+						value="#{movimentacaoPrestadorBean.editEntity.sexo}">
+						<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+							noSelectionOption="true" />
+						<f:selectItems value="#{movimentacaoPrestadorBean.sexoList()}"
+							var="e" itemLabel="#{e.descricao}" itemValue="#{e.codigo}" />
+					</p:selectOneMenu>
+					<p:message for="sexo" display="text" />
+				</h:panelGrid>
+
+				<!-- E-MAIL -->
+				<h:panelGrid style="width:100% !important;">
+					<p:outputLabel for="email"
+						value="#{msg['movimentacaoPrestador.email']}" />
+					<p:inputText id="email" style="width:95% !important;"
+						disabled="#{movimentacaoPrestadorBean.isDisable('EMAIL')}"
+						required="#{movimentacaoPrestadorBean.isRequired('EMAIL')}"
+						maxlength="60"
+						value="#{movimentacaoPrestadorBean.editEntity.email}"
+						validator="vEmailValidator">
+						<f:validateLength minimum="1" maximum="60" />
+						<pe:keyFilter regEx="/[A-Z0-9\.\@\_\-]/i" />
+						<p:ajax event="change" update="@this,emailMessage"
+							partialSubmit="true" global="false" />
+					</p:inputText>
+					<p:message id="emailMessage" for="email" display="text" />
+				</h:panelGrid>
+				
+				<!-- NOME SOCIAL -->
+				<h:panelGrid style="width:100% !important;">
+					<p:outputLabel for="nomeSocial"
+						value="#{msg['movimentacaoPrestador.nomeSocial']}" />
+					<p:inputText id="nomeSocial"
+						disabled="#{movimentacaoPrestadorBean.isDisable('NOMESOCIAL')}"
+						required="#{movimentacaoPrestadorBean.isRequired('NOMESOCIAL')}"
+						title="#{msg['movimentacaoPrestador.nomeSocial.msg']}"
+						onchange="converteMaiuscula(this)" style="width:100% !important;"
+						maxlength="70"
+						value="#{movimentacaoPrestadorBean.editEntity.nomeSocial}">
+						<pe:keyFilter regEx="/[A-ZzÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]/i" />
+						<p:ajax partialSubmit="true" global="false" event="change" />
+					</p:inputText>
+					<p:message for="nomeSocial" display="text" />
+				</h:panelGrid>
+				
+				<!-- DATA DE VALIDADE CRM -->
+				<h:panelGrid id="gridDataValidadeCRM">
+					<p:outputLabel for="dataValidadeCRM"
+						value="#{msg['movimentacaoPrestador.dataValidadeCRM']}" />
+					<p:calendar id="dataValidadeCRM"
+						mindate="#{movimentacaoPrestadorBean.editEntity.dataValidadeCRM}"
+						showOn="button"
+						disabled="#{movimentacaoPrestadorBean.isDisable('DATAVALIDADECRM')}"
+						required="#{movimentacaoPrestadorBean.isRequired('DATAVALIDADECRM')}"
+						mask="true" 
+						value="#{movimentacaoPrestadorBean.editEntity.dataValidadeCRM}"
+						navigator="true" pattern="dd/MM/yyyy">
+						<o:validateOrder id="orderDataValidadeCRM"
+							components="dataNascimento dataValidadeCRM"
+							message="#{msg['informativo.dataInvalida']}"
+							showMessageFor="dataValidadeCRM" />
+						<p:ajax partialSubmit="true" event="change"
+							update="gridDataValidadeCRM" />
+					</p:calendar>
+					<p:message for="dataValidadeCRM" display="text" />
+				</h:panelGrid>
+				
+				<!-- UF DE EMISSÂO -->
+				<h:panelGrid style="text-align:left" id="gridUfEmissao">
+					<p:outputLabel for="ufEmissao"
+						value="#{msg['movimentacaoPrestador.ufEmissao']}" />
+					<p:selectOneMenu id="ufEmissao"
+						converter="#{vEntityConverter}"
+						disabled="#{movimentacaoPrestadorBean.isDisable('UFEMISSAO')}"
+						required="#{movimentacaoPrestadorBean.isRequired('UFEMISSAO')}"
+						value="#{movimentacaoPrestadorBean.editEntity.ufEmissao}">
+						<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+							noSelectionOption="true" />
+						<f:selectItems value="#{movimentacaoPrestadorBean.estadosList}"
+							var="e" itemLabel="#{e.sigla}" />
+					</p:selectOneMenu>
+					<p:message for="ufEmissao" display="text" />
+				</h:panelGrid>
+
+			</p:panelGrid>
+
+			<!-- AUTORIZA FORNECER EMAIL			 -->
+			<p:panelGrid layout="grid" columns="1">
+				<h:panelGrid columns="2">
+					<h:outputLabel for="autorizaFornecerEmail"
+						style="font-size: 12.9px;"
+						value="#{msg['movimentacaoPrestador.autorizaFornecerEmail']}" />
+					<p:selectOneRadio id="autorizaFornecerEmail"
+						disabled="#{movimentacaoPrestadorBean.isDisable('AUTORIZAFORNECEREMAIL')}"
+						required="#{movimentacaoPrestadorBean.isRequired('AUTORIZAFORNECEREMAIL')}"
+						value="#{movimentacaoPrestadorBean.editEntity.autorizaFornecerEmail}">
+						<f:selectItem itemLabel="Sim" itemValue="true" />
+						<f:selectItem itemLabel="Não" itemValue="false" />
+						<p:ajax event="change" process="@this"
+							update="@this,emailAutorizMessage" partialSubmit="true"
+							global="false" />
+					</p:selectOneRadio>
+					<p:message id="emailAutorizMessage" for="autorizaFornecerEmail"
+						display="text" />
+				</h:panelGrid>
+
+			</p:panelGrid>
+
+			<!-- DEFICIÊNCIA -->
+			<p:fieldset legend="#{msg['movimentacao.prestador.deficiencia']}"
+				style="margin-top:1%">
+				<p:panelGrid id="deficiencia" columns="3" layout="grid">
+
+					<h:panelGrid columns="2">
+						<p:selectBooleanCheckbox id="defFisica"
+							value="#{movimentacaoPrestadorBean.editEntity.defFisica}" />
+						<h:outputLabel for="defFisica"
+							title="#{msg['movimentacaoPrestador.deficiencia.msg']}"
+							value="#{msg['movimentacaoPrestador.defFisica']}" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="2">
+						<p:selectBooleanCheckbox id="defVisual"
+							value="#{movimentacaoPrestadorBean.editEntity.defVisual}" />
+						<h:outputLabel for="defVisual"
+							title="#{msg['movimentacaoPrestador.deficiencia.msg']}"
+							value="#{msg['movimentacaoPrestador.defVisual']}" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="2">
+						<p:selectBooleanCheckbox id="defAuditiva"
+							value="#{movimentacaoPrestadorBean.editEntity.defAuditiva}" />
+						<h:outputLabel for="defAuditiva"
+							title="#{msg['movimentacaoPrestador.deficiencia.msg']}"
+							value="#{msg['movimentacaoPrestador.defAuditiva']}" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="2">
+						<p:selectBooleanCheckbox id="defMental"
+							value="#{movimentacaoPrestadorBean.editEntity.defMental}" />
+						<h:outputLabel for="defMental"
+							title="#{msg['movimentacaoPrestador.deficiencia.msg']}"
+							value="#{msg['movimentacaoPrestador.defMental']}" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="2">
+						<p:selectBooleanCheckbox id="defIntelectual"
+							value="#{movimentacaoPrestadorBean.editEntity.defIntelectual}" />
+						<h:outputLabel for="defIntelectual"
+							title="#{msg['movimentacaoPrestador.deficiencia.msg']}"
+							value="#{msg['movimentacaoPrestador.defIntelectual']}" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="2">
+						<p:selectBooleanCheckbox id="defReabilitado"
+							value="#{movimentacaoPrestadorBean.editEntity.defReabilitado}" />
+						<h:outputLabel for="defReabilitado"
+							title="#{msg['movimentacaoPrestador.deficiencia.msg']}"
+							value="#{msg['movimentacaoPrestador.defReabilitado']}" />
+					</h:panelGrid>
+				</p:panelGrid>
+				
+				<h:panelGrid style="width:100% !important;">
+					<p:outputLabel for="obsDeficiencia"
+						value="#{msg['movimentacaoPrestador.obsDeficiencia']}" />
+					<p:inputTextarea rows="4" cols="4" id="obsDeficiencia"
+						disabled="#{movimentacaoPrestadorBean.isDisable('OBSDEFICIENCIA')}"
+						required="#{movimentacaoPrestadorBean.isRequired('OBSDEFICIENCIA')}"
+						title="#{msg['movimentacaoPrestador.obsDeficiencia.msg']}"
+						onchange="converteMaiuscula(this)" style="width:100% !important;"
+						maxlength="70"
+						value="#{movimentacaoPrestadorBean.editEntity.obsDeficiencia}">
+						<pe:keyFilter regEx="/[A-ZzÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]/i" />
+						<p:ajax partialSubmit="true" global="false" event="change" />
+					</p:inputTextarea>
+					<p:message for="obsDeficiencia" display="text" />
+				</h:panelGrid>
+				
+			</p:fieldset>
+
+			<p:panelGrid layout="grid" columns="1" id="gridFooterDadosPessoais">
+				<p:commandButton value="#{msg['btn.salvarParcial']}"
+					rendered="#{movimentacaoPrestadorBean.editEntity.situacao eq 'ANALISE' ? false:true}"
+					icon="fa fa-save" update="textoUltimaMovimentacao"
+					action="#{movimentacaoPrestadorBean.salvarParcial()}">
+					<o:ignoreValidationFailed />
+				</p:commandButton>
+			</p:panelGrid>
+		</p:panel>
+
+	</p:tab>
+
+</ui:composition>

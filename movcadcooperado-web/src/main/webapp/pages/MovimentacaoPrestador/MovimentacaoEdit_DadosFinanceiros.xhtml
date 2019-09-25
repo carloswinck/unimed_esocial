@@ -1,0 +1,138 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<!-- Tab de dados financeiros -->
+	<p:tab id="dadosFinanceiros"
+		title="#{msg['movimentacao.prestador.dadosFinanceiros']}"
+		titleStyleClass="tabAlign">
+		<p:panel header="#{msg['movimentacao.prestador.dadosFinanceiros']}">
+
+			<!-- DADOS BANCARIOS -->
+			<p:fieldset
+				legend="#{msg['movimentacaoPrestadorFinanceiro.dadosBancarios']}">
+				<p:panelGrid columns="2" styleClass="semBorda" layout="grid"
+					style="text-align:left">
+
+					<!-- BANCO -->
+					<h:panelGrid id="gridBanco">
+						<p:outputLabel for="banco"
+							value="#{msg['movimentacaoPrestadorFinanceiro.banco']}" />
+						<p:selectOneMenu id="banco" converter="#{vEntityConverter}"
+							required="#{movimentacaoPrestadorBean.isRequired('BANCO') and movimentacaoPrestadorBean.editEntity.dadosFinanceiros.banco.codigo ne 33}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('BANCO') or (movimentacaoPrestadorBean.editEntity.dadosFinanceiros.banco.codigo eq 33 and movimentacaoPrestadorBean.editEntity.situacao != null)}"
+							value="#{movimentacaoPrestadorBean.editEntity.dadosFinanceiros.banco}">
+							<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems value="#{movimentacaoPrestadorBean.bancosList}"
+								var="b" itemLabel="#{b.nome}">
+							</f:selectItems>
+							<p:ajax event="change" partialSubmit="true" global="false"
+								update="@parent, gridAgencia, gridConta, gridContaDV, gridBanco, gridPoupanca" />
+						</p:selectOneMenu>
+						<p:message for="banco" display="text" />
+					</h:panelGrid>
+
+					<!-- CONTA/POUPANCA -->
+					<h:panelGrid id="gridAgencia">
+						<p:outputLabel for="agencia"
+							value="#{msg['movimentacaoPrestadorFinanceiro.agencia']}" />
+						<p:inputText id="agencia" maxlength="8" style="width:50%"
+							title="#{msg['movimentacao.prestador.dadosFinanceiros.poupanca']}"
+							required="#{movimentacaoPrestadorBean.isRequired('AGENCIA')}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('AGENCIA') or movimentacaoPrestadorBean.desabilitaItem}"
+							value="#{movimentacaoPrestadorBean.agenciaAux}"
+							validator="#{movimentacaoPrestadorBean.agenciaValidator}">
+
+							<pe:keyFilter regEx="/[0-9]/i" />
+							<p:ajax update="gridAgencia" partialSubmit="true" event="change"
+								listener="#{movimentacaoPrestadorBean.carregarAgenciasList(movimentacaoPrestadorBean.editEntity.dadosFinanceiros.banco)}" />
+						</p:inputText>
+
+						<p:message for="agencia" display="text" />
+					</h:panelGrid>
+
+					<!-- 					AGENCIA -->
+					<!-- 					<h:panelGrid id="gridAgencia"> -->
+					<!-- 						<p:outputLabel for="agencia" -->
+					<!-- 							value="#{msg['movimentacaoPrestadorFinanceiro.agencia']}" /> -->
+					<!-- 						<p:selectOneMenu id="agencia" converter="#{vEntityConverter}"  -->
+					<!-- 							required="#{movimentacaoPrestadorBean.isRequired('AGENCIA')}" -->
+					<!-- 							disabled="#{movimentacaoPrestadorBean.isDisable('AGENCIA') or movimentacaoPrestadorBean.desabilitaItem}" -->
+					<!-- 							value="#{movimentacaoPrestadorBean.editEntity.dadosFinanceiros.agencia}"> -->
+					<!-- 							<f:selectItem itemLabel="#{msg['selecione']}" itemValue="" -->
+					<!-- 								noSelectionOption="true" /> -->
+					<!-- 							<f:selectItems -->
+					<!-- 								value="#{movimentacaoPrestadorBean.carregarAgenciasList(movimentacaoPrestadorBean.editEntity.dadosFinanceiros.banco)}" -->
+					<!-- 								var="e" itemLabel="#{e.agencia}" /> -->
+					<!-- 							<p:ajax event="change" partialSubmit="true" global="false" -->
+					<!-- 								update="conta, contaDV" /> -->
+					<!-- 						</p:selectOneMenu> -->
+					<!-- 						<p:message for="agencia" display="text" /> -->
+					<!-- 					</h:panelGrid> -->
+
+					<!-- CONTA/POUPANCA -->
+					<h:panelGrid id="gridConta">
+						<p:outputLabel for="conta"
+							value="#{msg['movimentacaoPrestadorFinanceiro.conta']}" />
+						<p:inputText id="conta" maxlength="8" style="width:50%"
+							title="#{msg['movimentacao.prestador.dadosFinanceiros.poupanca']}"
+							required="#{movimentacaoPrestadorBean.isRequired('CONTACORRENTE')}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('CONTACORRENTE') or movimentacaoPrestadorBean.desabilitaItem}"
+							value="#{movimentacaoPrestadorBean.editEntity.dadosFinanceiros.contaCorrente}"
+							validator="#{movimentacaoPrestadorBean.limiteCaracterValidar}">
+							<p:ajax event="blur" partialSubmit="true" update="contaDV"
+								global="false" />
+
+							<pe:keyFilter regEx="/[0-9]/i" />
+							<p:ajax update="gridConta, gridContaDV" partialSubmit="true"
+								event="change"
+								listener="#{movimentacaoPrestadorBean.mudarDigitoVerificador}" />
+						</p:inputText>
+
+						<p:message for="conta" display="text" />
+					</h:panelGrid>
+
+					<!-- DV CONTA/POUPANCA -->
+					<h:panelGrid id="gridContaDV">
+						<p:outputLabel for="contaDV"
+							value="#{msg['movimentacaoPrestadorFinanceiro.dv']}" />
+						<p:inputText id="contaDV" maxlength="1" style="width:30%"
+							required="#{movimentacaoPrestadorBean.isRequired('DV')}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('DV') or movimentacaoPrestadorBean.desabilitaItem}"
+							value="#{movimentacaoPrestadorBean.editEntity.dadosFinanceiros.dv}">
+							<f:validateLength maximum="1" />
+							<pe:keyFilter regEx="/[0-9]/i" />
+						</p:inputText>
+						<p:message for="contaDV" display="text" />
+					</h:panelGrid>
+
+					<!-- EH CONTA POUPANCA -->
+					<h:panelGrid id="gridPoupanca" columns="2">
+						<p:selectBooleanCheckbox id="contaPoupanca"
+							disabled="#{movimentacaoPrestadorBean.isDisable('EHCONTAPOUPANCA') or movimentacaoPrestadorBean.desabilitaItem}"
+							value="#{movimentacaoPrestadorBean.editEntity.dadosFinanceiros.contaPoupanca}"
+							required="false" />
+						<h:outputLabel for="contaPoupanca"
+							value="#{msg['movimentacaoPrestadorFinanceiro.poupanca']}" />
+					</h:panelGrid>
+				</p:panelGrid>
+			</p:fieldset>
+
+			<p:panelGrid layout="grid" columns="1" id="gridFooterFinanceiro">
+				<p:commandButton value="#{msg['btn.salvarParcial']}"
+					rendered="#{movimentacaoPrestadorBean.editEntity.situacao eq 'ANALISE' ? false:true}"
+					icon="fa fa-save" update="textoUltimaMovimentacao"
+					action="#{movimentacaoPrestadorBean.salvarParcial()}">
+				</p:commandButton>
+			</p:panelGrid>
+
+		</p:panel>
+	</p:tab>
+
+</ui:composition>

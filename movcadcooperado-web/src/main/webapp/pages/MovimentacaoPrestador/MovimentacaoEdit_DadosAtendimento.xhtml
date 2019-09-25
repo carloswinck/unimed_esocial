@@ -1,0 +1,116 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<!-- Tab Dados de atendimento -->
+	<p:tab id="dadosAtendimento"
+		title="#{msg['movimentacao.prestador.dadosAtendimento']}" titleStyleClass="tabAlign">
+
+		<p:panel header="#{msg['movimentacao.prestador.dadosAtendimento']}">
+
+			<p:dataTable rows="5" id="tabelaDadosAtendimento"
+				style="margin-top:1%"
+				emptyMessage="#{msg['informativo.logradouro.vazio']}" reflow="true"
+				value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimentoList}"
+				paginator="true" paginatorPosition="bottom" var="_endereco">
+
+				<p:column
+					headerText="#{msg['movimentacaoPrestadorEndereco.logradouro']}">
+					<h:outputText value="#{_endereco.logradouro}" />
+				</p:column>
+
+				<p:column
+					headerText="#{msg['movimentacaoPrestadorEndereco.numero']}">
+					<h:outputText value="#{_endereco.numero}" />
+				</p:column>
+
+				<p:column
+					headerText="#{msg['movimentacaoPrestadorEndereco.bairro']}">
+					<h:outputText value="#{_endereco.bairro}" />
+				</p:column>
+
+				<p:column headerText="#{msg['movimentacaoPrestadorEndereco.cep']}">
+					<h:outputText value="#{_endereco.cep}" />
+				</p:column>
+
+				<p:column
+					headerText="#{msg['movimentacaoPrestadorEndereco.municipio']}">
+					<h:outputText value="#{_endereco.municipio.nome}"
+						rendered="#{not empty _endereco.municipio}" />
+				</p:column>
+
+				<!-- AÇÕES -->
+				<p:column headerText="#{msg['label.acao']}" rendered="#{movimentacaoPrestadorBean.editarDadosAtendimento}">
+
+					<!-- EDITAR DADOS DE ATENDIMENTO -->
+					<p:commandButton icon="fa fa-fw fa-edit" immediate="true"
+						action="#{movimentacaoPrestadorBean.editarEnderecoAtendimento(_endereco)}"
+						update="tabelaDadosAtendimento, :formDialogEnderecoAtendimento, :formListLogradouros"
+						oncomplete="PF('itemEnderecoAtendimento').show();">
+
+						<f:setPropertyActionListener
+							target="#{movimentacaoPrestadorBean.editEntity.itemEnderecoAtendimento}"
+							value="#{_endereco}" />
+					</p:commandButton>
+
+					<p:graphicImage value="/resources/img/alerta.png" width="30px"
+						title="#{msg['error.atendimento.pendente']}"
+						style="margin-left:10%"
+						rendered="#{movimentacaoPrestadorBean.renderizaAlertaDadosAtendimento(_endereco)}" />
+
+					<!-- EXCLUIR DADOS DE ATENDIMENTO -->
+					<p:commandButton icon="fa fa-trash" style="margin-left:10%"
+						action="#{movimentacaoPrestadorBean.excluirItemEnderecoAtendimento()}"
+						update="tabelaDadosAtendimento">
+						<p:confirm
+							header="#{msg['informativo.endereco.atendimento.excluir']}"
+							message="#{msg['informativo.endereco.confirmacao.message']}"
+							icon="fa fa-warning" />
+						<f:setPropertyActionListener
+							target="#{movimentacaoPrestadorBean.editEntity.itemEnderecoAtendimento}"
+							value="#{_endereco}" />
+					</p:commandButton>
+
+					<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+						<p:commandButton value="#{msg['btn.dialog.yes']}"
+							styleClass="ui-confirmdialog-yes" icon="fa fa-check" />
+						<p:commandButton value="#{msg['btn.dialog.no']}"
+							styleClass="ui-confirmdialog-no" icon="fa fa-close" />
+					</p:confirmDialog>
+
+				</p:column>
+
+				<f:facet name="footer">
+					<h:panelGrid id="gridFooter" styleClass="semBorda"
+						style="text-align:left">
+						<p:commandButton icon="fa fa-plus" immediate="true"
+							action="#{movimentacaoPrestadorBean.novoEnderecoAtendimento()}"
+							update=":formDialogEnderecoAtendimento, :formListLogradouros"
+							oncomplete="PF('itemEnderecoAtendimento').show();">
+							<o:ignoreValidationFailed />
+						</p:commandButton>
+					</h:panelGrid>
+				</f:facet>
+			</p:dataTable>
+
+			<p:panelGrid columns="1" layout="grid"
+				id="gridFooterDadosAtendimento">
+				<p:commandButton value="#{msg['btn.salvarParcial']}"
+					rendered="#{movimentacaoPrestadorBean.editEntity.situacao eq 'ANALISE' ? false:true}"
+					icon="fa fa-save" update="textoUltimaMovimentacao"
+					action="#{movimentacaoPrestadorBean.salvarParcial()}">
+					<o:ignoreValidationFailed />
+				</p:commandButton>
+
+			</p:panelGrid>
+
+		</p:panel>
+
+	</p:tab>
+
+</ui:composition>

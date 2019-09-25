@@ -1,0 +1,449 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<!-- 				Tab de dados complementares -->
+	<p:tab id="dadosContato"
+		title="#{msg['movimentacao.prestador.dadosComplementares']}"
+		titleStyleClass="tabAlign">
+		<p:panel header="#{msg['movimentacao.prestador.dadosComplementares']}">
+			<h:inputHidden id="dataNascimentoHidden"
+				value="#{movimentacaoPrestadorBean.editEntity.dataNascimento}"
+				converter="vDateConverter" />
+
+			<!-- CARTEIRA DE TRABALHO -->
+			<p:fieldset legend="#{msg['movimentacao.carteira.trabalho']}">
+				<p:panelGrid columns="3" styleClass="semBorda" layout="grid"
+					style="text-align:left">
+					<!-- 								NUMERO CARTEIRA DE TRABALHO (CTPS) -->
+					<h:panelGrid>
+						<p:outputLabel for="carteiraTrabalho"
+							value="#{msg['movimentacaoPrestador.numeroCTPS']}" />
+						<p:inputText id="carteiraTrabalho" style="width:40%"
+							maxlength="11"
+							disabled="#{movimentacaoPrestadorBean.isDisable('CTPSNUMERO')}"
+							required="#{movimentacaoPrestadorBean.isRequired('CTPSNUMERO')}"
+							title="#{msg['movimentacaoPrestador.numeroCTPS.msg']}"
+							value="#{movimentacaoPrestadorBean.editEntity.numeroCTPS}">
+							<pe:keyFilter regEx="/[0-9]/" />
+							<f:validateLength minimum="1" maximum="11" />
+							<p:ajax partialSubmit="true" event="change"
+								update="gridNumeroSerieCtps, gridUfExpedicaoCtps" global="false" />
+						</p:inputText>
+						<p:message for="carteiraTrabalho" display="text" />
+					</h:panelGrid>
+
+					<!-- 								NUMERO DE SÉRIE (CTPS) -->
+					<h:panelGrid id="gridNumeroSerieCtps">
+						<p:outputLabel for="numeroSerieCtps"
+							value="#{msg['movimentacaoPrestador.numeroSerieCTPS']}" />
+						<p:inputText id="numeroSerieCtps" style="width:45%" maxlength="5"
+							disabled="#{empty movimentacaoPrestadorBean.editEntity.numeroCTPS or movimentacaoPrestadorBean.isDisable('CTPSSERIE') or movimentacaoPrestadorBean.isDisable('CTPSSERIE')}"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.numeroCTPS or movimentacaoPrestadorBean.isRequired('CTPSSERIE')}"
+							value="#{movimentacaoPrestadorBean.editEntity.numeroSerieCTPS}">
+							<pe:keyFilter regEx="/[0-9]/" />
+							<f:validateLength minimum="1" maximum="5" />
+						</p:inputText>
+						<p:message for="numeroSerieCtps" display="text" />
+					</h:panelGrid>
+
+					<!-- 						  		UF EXPEDIÇÃO CTPS-->
+					<h:panelGrid id="gridUfExpedicaoCtps">
+						<p:outputLabel for="ufExpedicaoCtps"
+							value="#{msg['movimentacaoPrestador.ufCTPS']}" />
+						<p:selectOneMenu id="ufExpedicaoCtps"
+							disabled="#{empty movimentacaoPrestadorBean.editEntity.numeroCTPS or movimentacaoPrestadorBean.isDisable('CTPSUF')}"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.numeroCTPS or movimentacaoPrestadorBean.isRequired('CTPSUF')}"
+							converter="#{vEntityConverter}"
+							value="#{movimentacaoPrestadorBean.editEntity.ufCTPS}">
+							<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems value="#{movimentacaoPrestadorBean.estadosList}"
+								var="e" itemLabel="#{e.sigla}" />
+						</p:selectOneMenu>
+						<p:message for="ufExpedicaoCtps" display="text" />
+					</h:panelGrid>
+				</p:panelGrid>
+			</p:fieldset>
+
+			<p:fieldset legend="#{msg['movimentacao.habilitacao']}"
+				style="margin-top:2%">
+				<p:panelGrid columns="3" layout="grid" style="text-align:left">
+
+					<!-- 								NUMERO REGISTRO (CNH) -->
+					<h:panelGrid>
+						<p:outputLabel for="numeroCNH"
+							value="#{msg['movimentacaoPrestador.numeroCNH']}" />
+						<p:inputText id="numeroCNH" style="width:65%" maxlength="12"
+							title="#{msg['movimentacaoPrestador.numeroCNH.msg']}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('CNHNUMERO')}"
+							required="#{movimentacaoPrestadorBean.isRequired('CNHNUMERO')}"
+							value="#{movimentacaoPrestadorBean.editEntity.numeroCNH}">
+							<p:ajax partialSubmit="true" global="false"
+								update="gridDataPrimeirarHabilit,gridDataEmissaoCNH,gridEstadoEmissaoCNH,gridCategoriaCNH,gridDataValidadeCNH"
+								event="change" />
+							<pe:keyFilter regEx="/[\d]/" />
+						</p:inputText>
+						<p:message for="numeroCNH" display="text" />
+					</h:panelGrid>
+
+					<!-- 						    DATA DE EMISSÃO CNH -->
+					<h:panelGrid id="gridDataEmissaoCNH">
+						<p:outputLabel for="dataEmissaoCNH"
+							value="#{msg['movimentacaoPrestador.dataExpedicaoCNH']}" />
+						<p:calendar id="dataEmissaoCNH"
+							mindate="#{movimentacaoPrestadorBean.editEntity.dataNascimento}"
+							maxdate="#{now}" validator="dataFuturaValidator"
+							yearRange="-116: " showOn="button"
+							disabled="#{movimentacaoPrestadorBean.isDisable('CNHDATAEXPEDICAO') or empty movimentacaoPrestadorBean.editEntity.numeroCNH}"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.numeroCNH or movimentacaoPrestadorBean.isRequired('CNHDATAEXPEDICAO')}"
+							mask="true"
+							value="#{movimentacaoPrestadorBean.editEntity.dataExpedicaoCNH}"
+							navigator="true" pattern="dd/MM/yyyy">
+							<p:ajax partialSubmit="true" event="dateSelect"
+								update="@parent,gridDataValidadeCNH" />
+							<p:ajax partialSubmit="true" event="change"
+								update="@parent,gridDataValidadeCNH" />
+							<o:validateOrder id="orderDataEmissaoCNH"
+								components="dataNascimentoHidden dataEmissaoCNH"
+								message="#{msg['informativo.dataInvalida']}"
+								showMessageFor="dataEmissaoCNH" />
+						</p:calendar>
+						<p:message for="dataEmissaoCNH" display="text" />
+					</h:panelGrid>
+
+					<!-- 						  		ESTADO EMISSOR CNH-->
+					<h:panelGrid id="gridEstadoEmissaoCNH">
+						<p:outputLabel for="estadoEmissorCNH"
+							value="#{msg['movimentacaoPrestador.ufCNH']}" />
+						<p:selectOneMenu id="estadoEmissorCNH"
+							title="#{msg['movimentacaoPrestador.ufCNH.msg']}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('CNHUF') or empty movimentacaoPrestadorBean.editEntity.numeroCNH}"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.numeroCNH or movimentacaoPrestadorBean.isRequired('CNHUF')}"
+							converter="#{vEntityConverter}"
+							value="#{movimentacaoPrestadorBean.editEntity.ufCNH}">
+							<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems value="#{movimentacaoPrestadorBean.estadosList}"
+								var="e" itemLabel="#{e.sigla}" />
+						</p:selectOneMenu>
+						<p:message for="estadoEmissorCNH" display="text" />
+					</h:panelGrid>
+
+					<!-- 						  		CATEGORIA CNH  -->
+					<h:panelGrid id="gridCategoriaCNH">
+						<p:outputLabel for="categoriaCNH"
+							value="#{msg['movimentacaoPrestador.categoriaCNH']}" />
+						<p:selectOneMenu id="categoriaCNH"
+							disabled="#{movimentacaoPrestadorBean.isDisable('CNHCATEGORIA') or empty movimentacaoPrestadorBean.editEntity.numeroCNH}"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.numeroCNH or movimentacaoPrestadorBean.isRequired('CNHCATEGORIA')}"
+							value="#{movimentacaoPrestadorBean.editEntity.categoriaCNH}">
+							<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems
+								value="#{movimentacaoPrestadorBean.categoriasCnh()}" var="e"
+								itemLabel="#{e.descricao}" />
+						</p:selectOneMenu>
+						<p:message for="categoriaCNH" display="text" />
+					</h:panelGrid>
+
+					<!-- 						    DATA VALIDADE CNH-->
+					<h:panelGrid id="gridDataValidadeCNH">
+						<p:outputLabel for="dataValidadeCNH"
+							value="#{msg['movimentacaoPrestador.dataValidadeCNH']}" />
+						<p:calendar id="dataValidadeCNH"
+							title="#{msg['movimentacaoPrestador.dataValidadeCNH.msg']}"
+							mindate="#{movimentacaoPrestadorBean.editEntity.dataExpedicaoCNH}"
+							mask="true" showOn="button"
+							disabled="#{movimentacaoPrestadorBean.isDisable('CNHDATAVALIDADE') or empty movimentacaoPrestadorBean.editEntity.numeroCNH}"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.numeroCNH or movimentacaoPrestadorBean.isRequired('CNHDATAVALIDADE')}"
+							value="#{movimentacaoPrestadorBean.editEntity.dataValidadeCNH}"
+							navigator="true" pattern="dd/MM/yyyy">
+							<p:ajax partialSubmit="true" update="@parent,gridDataEmissaoCNH"
+								event="change" />
+							<o:validateOrder id="order"
+								components="dataEmissaoCNH dataValidadeCNH"
+								message="#{msg['informativo.data.validade.incorreta']}"
+								showMessageFor="dataValidadeCNH" />
+						</p:calendar>
+						<p:message for="dataValidadeCNH" display="text" />
+					</h:panelGrid>
+
+					<!-- 						    DATA 1 HABILITAÇÃO -->
+					<h:panelGrid id="gridDataPrimeirarHabilit">
+						<p:outputLabel for="dataPrimeiraCNH"
+							value="#{msg['movimentacaoPrestador.dataPrimeiraCNH']}" />
+						<p:calendar id="dataPrimeiraCNH" maxdate="#{now}"
+							validator="dataFuturaValidator" yearRange="-116:" mask="true"
+							showOn="button"
+							mindate="#{movimentacaoPrestadorBean.editEntity.dataNascimento}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('CNHDATAHABILITACAO1') or empty movimentacaoPrestadorBean.editEntity.numeroCNH}"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.numeroCNH or movimentacaoPrestadorBean.isRequired('CNHDATAHABILITACAO1')}"
+							value="#{movimentacaoPrestadorBean.editEntity.dataPrimeiraCNH}"
+							navigator="true" pattern="dd/MM/yyyy" />
+						<o:validateOrder id="orderPrimeiraHabilitacao"
+							components="dataNascimentoHidden dataPrimeiraCNH"
+							message="#{msg['informativo.dataInvalida']}"
+							showMessageFor="dataPrimeiraCNH" />
+
+						<p:message for="dataPrimeiraCNH" display="text" />
+					</h:panelGrid>
+				</p:panelGrid>
+			</p:fieldset>
+
+			<p:fieldset legend="#{msg['movimentacao.inscricao.rne']}"
+				style="margin-top:2%">
+				<p:panelGrid columns="3" layout="grid" style="text-align:left">
+					<!-- 								INSCRIÇÃO RNE -->
+					<h:panelGrid>
+						<p:outputLabel for="numeroRNE"
+							value="#{msg['movimentacaoPrestador.numeroRNE']}" />
+						<p:inputText id="numeroRNE" style="width:40%" maxlength="14"
+							onblur="converteMaiuscula(this)"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? false:true and 
+													movimentacaoPrestadorBean.isRequired('RNENUMERO')}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('RNENUMERO') or not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? true:false}"
+							value="#{movimentacaoPrestadorBean.editEntity.numeroRNE}">
+
+							<f:validateLength minimum="1" maximum="14" />
+						</p:inputText>
+						<p:message for="numeroRNE" display="text" />
+					</h:panelGrid>
+
+					<!-- 								ÓRGÃO EMISSOR RNE -->
+					<h:panelGrid>
+						<p:outputLabel for="orgaoEmissorRNE"
+							value="#{msg['movimentacaoPrestador.orgaoEmissorRNE']}" />
+						<p:inputText id="orgaoEmissorRNE" style="width:100%"
+							onblur="converteMaiuscula(this)" maxlength="20"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? false:true and
+													movimentacaoPrestadorBean.isRequired('RNEORGAO')}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('RNEORGAO') or not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? true:false}"
+							value="#{movimentacaoPrestadorBean.editEntity.orgaoEmissorRNE}">
+							<f:validateLength minimum="1" maximum="20" />
+						</p:inputText>
+						<p:message for="orgaoEmissorRNE" display="text" />
+					</h:panelGrid>
+
+					<!-- 						    DATA DE EXPEDIÇÃO RNE -->
+					<h:panelGrid>
+						<p:outputLabel for="dataExpedicaoRNE"
+							value="#{msg['movimentacaoPrestador.dataExpedicaoRNE']}" />
+						<p:calendar id="dataExpedicaoRNE"
+							mindate="#{movimentacaoPrestadorBean.editEntity.dataNascimento}"
+							maxdate="#{now}" 
+							validator="dataFuturaValidator" 
+							mask="true"
+							yearRange="-116: " 
+							showOn="button"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? false:true and
+													movimentacaoPrestadorBean.isRequired('RNEDATAEXPEDICAO')}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('RNEDATAEXPEDICAO') or not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? true:false}"
+							value="#{movimentacaoPrestadorBean.editEntity.dataExpedicaoRNE}"
+							navigator="true" 
+							pattern="dd/MM/yyyy">
+							<o:validateOrder id="orderExpedicaoRNE"
+								components="dataNascimentoHidden dataExpedicaoRNE"
+								message="#{msg['informativo.dataInvalida']}"
+								showMessageFor="dataExpedicaoRNE" />
+							<p:ajax partialSubmit="true" update="@parent" event="change" />
+						</p:calendar>
+						<p:message for="dataExpedicaoRNE " display="text" />
+					</h:panelGrid>
+					
+					<!-- UF DE EMISSÂO RNE -->
+					<h:panelGrid style="text-align:left" id="gridUfEmissaoRNE">
+						<p:outputLabel for="ufEmissaoRNE"
+							value="#{msg['movimentacaoPrestador.ufEmissao']}" />
+						<p:selectOneMenu id="ufEmissaoRNE"
+							converter="#{vEntityConverter}"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? false:true and
+													movimentacaoPrestadorBean.isRequired('UFEMISSAORNE')}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('UFEMISSAORNE') or not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? true:false}"
+							value="#{movimentacaoPrestadorBean.editEntity.ufEmissaoRNE}">
+							<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems value="#{movimentacaoPrestadorBean.estadosList}"
+								var="e" itemLabel="#{e.sigla}" />
+						</p:selectOneMenu>
+						<p:message for="ufEmissaoRNE" display="text" />
+					</h:panelGrid>
+
+					<!-- 						    DATA DE CHEGADA TRABALHADOR ESTRANGEIRO -->
+					<h:panelGrid>
+						<p:outputLabel for="dataChegada"
+							value="#{msg['movimentacaoPrestador.dataChegadaRNE']}" />
+						<p:calendar id="dataChegada" yearRange="-116:" maxdate="#{now}"
+							validator="dataFuturaValidator"
+							title="#{msg['movimentacaoPrestador.dataChegadaRNE.msg']}"
+							showOn="button"
+							mindate="#{movimentacaoPrestadorBean.editEntity.dataNascimento}"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? false:true and
+													movimentacaoPrestadorBean.isRequired('RNEDATACHEGADA')}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('RNEDATACHEGADA') or not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? true:false}"
+							mask="true"
+							value="#{movimentacaoPrestadorBean.editEntity.dataChegadaRNE}"
+							navigator="true" pattern="dd/MM/yyyy">
+							<p:ajax partialSubmit="true" update="@parent, " event="change" />
+							<o:validateOrder id="orderChegada"
+								components="dataNascimentoHidden dataChegada"
+								message="#{msg['informativo.dataInvalida']}"
+								showMessageFor="dataChegada" />
+						</p:calendar>
+						<p:message for="dataChegada" display="text" />
+					</h:panelGrid>
+
+					<!-- 						  		RNE CONDIÇÃO ESTRANGEIRO-->
+					<h:panelGrid>
+						<p:outputLabel for="condicaoRNE"
+							value="#{msg['movimentacaoPrestador.condicaoRNE']}" />
+						<p:selectOneMenu id="condicaoRNE" effect="fold"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? false:true and
+													movimentacaoPrestadorBean.isRequired('RNECONDICAO')}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('RNECONDICAO') or not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? true:false}"
+							value="#{movimentacaoPrestadorBean.editEntity.condicaoRNE}">
+							<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems
+								value="#{movimentacaoPrestadorBean.rneCondicaoList()}" var="e"
+								itemLabel="#{msg[e.descricao]}" />
+						</p:selectOneMenu>
+						<p:message for="condicaoRNE" display="text" />
+					</h:panelGrid>
+					
+					<!-- 							CASADO COM BRASILEIRO -->
+					<h:panelGrid columns="2">
+						<p:selectBooleanCheckbox id="casadoComBrasileiro"
+							disabled="#{movimentacaoPrestadorBean.isDisable('RNECASADOCOMBRAS') or not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? true:false}"
+							value="#{movimentacaoPrestadorBean.editEntity.casadoComBrasileiro}" />
+						<h:outputLabel for="casadoComBrasileiro"
+							value="#{msg['movimentacaoPrestador.casadoComBrasileiro']}" />
+					</h:panelGrid>
+
+					<!-- 						TEM FILHOS BRASILEIROS -->
+					<h:panelGrid columns="2">
+						<p:selectBooleanCheckbox id="filhosBrasileiros"
+							disabled="#{movimentacaoPrestadorBean.isDisable('RNEFILHOSBRAS') or not empty movimentacaoPrestadorBean.editEntity.nacionalidade and
+												movimentacaoPrestadorBean.editEntity.nacionalidade.nome eq 'Brasil' ? true:false}"
+							value="#{movimentacaoPrestadorBean.editEntity.filhosBrasileiros}" />
+						<h:outputLabel for="filhosBrasileiros"
+							value="#{msg['movimentacaoPrestador.filhosBrasileiros']}" />
+					</h:panelGrid>
+
+				</p:panelGrid>
+			</p:fieldset>
+
+			<!-- DOCUMENTO NACIONAL DE IDENTIDADE -->
+			<p:fieldset legend="#{msg['movimentacao.documento.nacional.identidade']}">
+				<p:panelGrid columns="3" styleClass="semBorda" layout="grid"
+					style="text-align:left">
+					
+					<!-- NUMERO DO DOCUMENTO DNI -->
+					<h:panelGrid>
+						<p:outputLabel for="numeroDocumentoDNI"
+							value="#{msg['movimentacao.documento.nacional.identidade.numero']}" />
+						<p:inputText id="numeroDocumentoDNI" 
+							style="width:100%"
+							maxlength="14"
+							disabled="#{movimentacaoPrestadorBean.isDisable('NUMERODOCUMENTODNI')}"
+							required="#{movimentacaoPrestadorBean.isRequired('NUMERODOCUMENTODNI')}"
+							title="#{msg['movimentacao.documento.nacional.identidade.numero.msg']}"
+							value="#{movimentacaoPrestadorBean.editEntity.numeroDocumentoDNI}">
+							<pe:keyFilter regEx="/[0-9]/" />
+							<f:validateLength minimum="1" maximum="14" />
+							<p:ajax partialSubmit="true" event="change" global="false" />
+						</p:inputText>
+						<p:message for="numeroDocumentoDNI" display="text" />
+					</h:panelGrid>
+					
+					<!-- ÓRGÃO EMISSOR DNI -->
+					<h:panelGrid id="gridOrgaoEmissorDNI">
+						<p:outputLabel for="orgaoEmissorDNI"
+							value="#{msg['movimentacao.documento.nacional.identidade.orgao.emissor']}" />
+						<p:inputText id="orgaoEmissorDNI" 
+							style="width:100%"
+							title="#{msg['movimentacao.documento.nacional.identidade.orgao.emissor.msg']}"
+							onblur="converteMaiuscula(this)" 
+							maxlength="20"
+							disabled="#{movimentacaoPrestadorBean.isDisable('ORGAOEMISSORDNI')}"
+							required="#{movimentacaoPrestadorBean.isRequired('ORGAOEMISSORDNI')}"
+							value="#{movimentacaoPrestadorBean.editEntity.orgaoEmissorDNI}">
+							<f:validateLength minimum="1" maximum="20" />
+						</p:inputText>
+						<p:message for="orgaoEmissorDNI" display="text" />
+					</h:panelGrid>
+
+					<!-- UF DE EMISSÂO DNI -->
+					<h:panelGrid>
+						<p:outputLabel for="ufEmissorDNI"
+							value="#{msg['movimentacao.documento.nacional.identidade.uf.emissor']}" />
+						<p:selectOneMenu id="ufEmissorDNI"
+							title="#{msg['movimentacao.documento.nacional.identidade.uf.emissor.msg']}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('UFEMISSORDNI')}"
+							required="#{movimentacaoPrestadorBean.isRequired('UFEMISSORDNI')}"
+							converter="#{vEntityConverter}"
+							value="#{movimentacaoPrestadorBean.editEntity.ufEmissorDNI}">
+							<f:selectItem itemLabel="#{msg['selecione']}" 
+								itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems value="#{movimentacaoPrestadorBean.estadosList}"
+								var="e" 
+								itemLabel="#{e.sigla}" />
+						</p:selectOneMenu>
+						<p:message for="ufEmissorDNI" display="text" />
+					</h:panelGrid>
+
+					<!-- DATA DE EXPEDICAO DNI -->
+					<h:panelGrid id="gridDataExpedicaoDNI">
+						<p:outputLabel for="dataExpedicaoDNI"
+							value="#{msg['movimentacao.documento.nacional.identidade.data.expedicao']}" />
+						<p:calendar id="dataExpedicaoDNI"
+							mindate="1/1/1900"
+							maxdate="#{now}"
+							title="#{msg['movimentacao.documento.nacional.identidade.data.expedicao.msg']}"
+							yearRange="-116: " 
+							showOn="button"
+							disabled="#{movimentacaoPrestadorBean.isDisable('DATAEXPEDICAODNI') or empty movimentacaoPrestadorBean.editEntity.numeroDocumentoDNI}"
+							required="#{not empty movimentacaoPrestadorBean.editEntity.numeroDocumentoDNI or movimentacaoPrestadorBean.isRequired('DATAEXPEDICAODNI')}"
+							mask="true"
+							value="#{movimentacaoPrestadorBean.editEntity.dataExpedicaoDNI}"
+							navigator="true" 
+							pattern="dd/MM/yyyy">
+						</p:calendar>
+						<p:message for="dataExpedicaoDNI" display="text" />
+					</h:panelGrid>
+
+				</p:panelGrid>
+			</p:fieldset>
+
+			<p:panelGrid layout="grid" columns="1"
+				id="gridFooterDadosProfissionais">
+				<p:commandButton value="#{msg['btn.salvarParcial']}"
+					rendered="#{movimentacaoPrestadorBean.editEntity.situacao eq 'ANALISE' ? false:true}"
+					icon="fa fa-save" update="textoUltimaMovimentacao"
+					action="#{movimentacaoPrestadorBean.salvarParcial()}">
+					<o:ignoreValidationFailed />
+				</p:commandButton>
+			</p:panelGrid>
+		</p:panel>
+	</p:tab>
+
+</ui:composition>

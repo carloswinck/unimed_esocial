@@ -1,0 +1,97 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<!-- 				Tab Upload Files -->
+	<p:tab id="anexarArquivos"
+		title="#{msg['movimentacao.prestador.anexarArquivos']}" titleStyleClass="tabAlign">
+		<p:panel id="panelUploadFile"
+			header="#{msg['movimentacao.prestador.anexarArquivos']}">
+			<p:panelGrid columns="1" layout="grid" id="gridUploadFile">
+
+				<!--  Upload file  -->
+				<h:panelGrid>
+
+					<p:dataTable rows="5" id="tabelaAnexo" style="margin-top:1%"
+						emptyMessage="#{msg['informativo.anexo.vazio']}" reflow="true"
+						value="#{movimentacaoPrestadorBean.movimentacaoPrestadorAnexoList}"
+						paginator="true" paginatorPosition="bottom" var="anexo">
+
+						<!-- LEGENDA -->
+						<p:column headerText="#{msg['anexo.legenda']}" colspan="1">
+							<h:outputText value="#{anexo.movimentacaoPrestadorCampo.legenda}" />
+						</p:column>
+
+						<!-- INFORMACAO DO CAMPO ALTERADO -->
+						<p:column headerText="#{msg['anexo.informacao']}" colspan="2"
+							id="colInfoCampo" style="text-align: left;">
+							<h:outputText value="#{anexo.informacaoCampoAnexo}" escape="false" style="white-space: pre-line; text-align: left;"/>
+						</p:column>
+
+						<!-- ARQUIVO ADICIONADO -->
+						<p:column headerText="#{msg['anexo.arquivo']}" colspan="3">
+							<p:fileUpload id="uploadArquivo" dragDropSupport="true"
+								fileUploadListener="#{movimentacaoPrestadorBean.fileUploadAction}"
+								mode="advanced" sizeLimit="5242880" multiple="false" auto="true"
+								allowTypes="/(\.|\/)(jpg|pdf|jpeg|png|doc|docx)$/i"
+								invalidFileMessage="#{msg['anexo.erro']}"
+								invalidSizeMessage="#{msg['anexo.tamanho.maximo']}"
+								label="#{msg['movimentacaoPrestadorUpload.file']}"
+								update="tabelaAnexo">
+								<f:attribute name="campoParam"
+									value="#{anexo.movimentacaoPrestadorCampo.campoNome}" />
+								<f:attribute name="logParam" value="#{anexo.codigoLogAuditoria}" />
+							</p:fileUpload>
+
+							<!-- NOME DO ARQUIVO -->
+							<h:outputText value="#{anexo.nomeArquivo}" />
+						</p:column>
+
+						<!-- EXCLUIR ANEXO -->
+						<p:column headerText="#{msg['label.acao']}" rendered="#{movimentacaoPrestadorBean.editarAnexarArquivos}">
+							<p:commandButton icon="fa fa-trash" style="margin-left:10%"
+								actionListener="#{movimentacaoPrestadorBean.excluirItemArquivo}"
+								update="tabelaAnexo">
+								<p:confirm header="#{msg['informativo.formacao.confirmacao']}"
+									message="#{msg['informativo.anexo.confirmacao.message']}"
+									icon="fa fa-warning" />
+								<f:attribute name="nomeParam" value="#{anexo.nomeArquivo}" />
+								<f:attribute name="logParam" value="#{anexo.codigoLogAuditoria}" />
+							</p:commandButton>
+						</p:column>
+
+					</p:dataTable>
+				</h:panelGrid>
+
+			</p:panelGrid>
+			<p:panelGrid layout="grid" columns="2" id="gridFooterUploadFile">
+				<p:commandButton value="#{msg['btn.salvarParcial']}"
+					rendered="#{movimentacaoPrestadorBean.editEntity.situacao eq 'ANALISE' ? false:true}"
+					icon="fa fa-save" update="textoUltimaMovimentacao"
+					action="#{movimentacaoPrestadorBean.salvarParcial()}">
+				</p:commandButton>
+
+				<p:commandButton value="#{msg['btn.finalizar']}" id="concluir"
+					rendered="#{movimentacaoPrestadorBean.editEntity.situacao eq 'ANALISE' ? false:true}"
+					icon="fa fa-save" action="#{movimentacaoPrestadorBean.concluir()}"
+					update="tabelaAnexo">
+					<p:confirm header="#{msg['informativo.formacao.confirmacao']}"
+						message="#{msg['informativo.formacao.concluir.message']}"
+						icon="fa fa-warning" />
+				</p:commandButton>
+
+				<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+					<p:commandButton value="#{msg['btn.dialog.yes']}" immediate="true"
+						styleClass="ui-confirmdialog-yes" icon="fa fa-check" />
+					<p:commandButton value="#{msg['btn.dialog.no']}"
+						styleClass="ui-confirmdialog-no" icon="fa fa-close" />
+				</p:confirmDialog>
+			</p:panelGrid>
+		</p:panel>
+	</p:tab>
+</ui:composition>

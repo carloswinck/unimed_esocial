@@ -1,0 +1,136 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<!-- 				Tab de dependentes -->
+	<p:tab id="dependentes"
+		title="#{msg['movimentacao.prestador.dependente']}" titleStyleClass="tabAlign">
+		<p:panel header="#{msg['movimentacao.prestador.dependente']}">
+
+			<p:dataTable rows="5" id="tabelaDependentes" style="margin-top:1%"
+				emptyMessage="#{msg['informativo.dependente.vazio']}" reflow="true"
+				value="#{movimentacaoPrestadorBean.movimentacaoPrestadorDependenteList}"
+				paginator="true" sortBy="#{dependente.nome}"
+				paginatorPosition="bottom" var="dependente">
+
+				<!-- 							TIPO DO DEPENDENTE -->
+				<p:column
+					headerText="#{msg['movimentacaoPrestadorDependente.tipoDependente']}" width="25%">
+					<h:outputText value="#{dependente.tipoDependente.descricao}" />
+
+				</p:column>
+
+				<!-- 							NOME COMPLETO -->
+				<p:column
+					headerText="#{msg['movimentacaoPrestadorDependente.nome']}"
+					width="25%">
+					<h:outputText value="#{dependente.nome}" />
+
+				</p:column>
+
+				<!-- 							DATA NASCIMENTO -->
+				<p:column
+					headerText="#{msg['movimentacaoPrestadorDependente.dataNascimento']}" width="14%">
+					<h:outputText value="#{dependente.dataNascimento}">
+						<f:convertDateTime pattern="dd/MM/yyyy" locale="pt" />
+					</h:outputText>
+				</p:column>
+
+				<!-- 							CPF -->
+				<p:column headerText="#{msg['movimentacaoPrestadorDependente.cpf']}"
+					width="15%">
+					<h:outputText value="#{dependente.cpf}">
+						<p:inputMask id="cpf" disabled="true"
+							value="#{dependente.cpf}"
+							style="width:25%; min-width:110px " mask="999.999.999-99" />
+						<p:message for="cpf" display="text" />
+					</h:outputText>
+					<p:message for="cpf" display="text" />
+				</p:column>
+
+				<!--   				          	DEPENDENTE IRRF -->
+				<p:column 
+				  headerText="#{msg['movimentacaoPrestadorDependente.irrf']}" width="13%">
+					<p:selectBooleanCheckbox id="dependenteIRRF"
+						value="#{dependente.irrf}" disabled="true" />
+				</p:column>
+
+				<!--   				          	Tipo Plano -->
+				<p:column
+					headerText="#{msg['movimentacaoPrestadorDependente.planoPrivadoSaude']}" width="12%">
+					<p:selectBooleanCheckbox id="dependentePlano"
+						value="#{dependente.planoPrivadoSaude}" disabled="true" />
+				</p:column>
+
+				<!-- 							AÇÕES -->
+				<p:column headerText="#{msg['label.acao']}" width="20%" rendered="#{movimentacaoPrestadorBean.editarDependente}">
+
+					<!-- 						EDITAR DEPENDENTE -->
+					<p:commandButton icon="fa fa-fw fa-edit"
+						
+						action="#{movimentacaoPrestadorBean.editarItemDependente(dependente)}"
+						update="tabelaDependentes, :formDialogCadastroDependente"
+						oncomplete="PF('itemDependenteDialog').show();">
+						<f:setPropertyActionListener
+							target="#{movimentacaoPrestadorBean.editEntity.itemDependente}"
+							value="#{dependente}" />
+					</p:commandButton>
+
+					<!-- 						EXCLUIR FORMAÇÃO -->
+					<p:commandButton icon="fa fa-trash" style="margin-left:10%"
+						
+						action="#{movimentacaoPrestadorBean.excluirItemDependente()}"
+						update="tabelaDependentes">
+						<p:confirm header="#{msg['informativo.formacao.confirmacao']}"
+							message="#{msg['informativo.formacao.confirmacao.message']}"
+							icon="fa fa-warning" />
+						<f:setPropertyActionListener
+							target="#{movimentacaoPrestadorBean.editEntity.itemDependente}"
+							value="#{dependente}" />
+					</p:commandButton>
+
+					<!-- 						ALERTA DE CAMPOS OBRIGATORIOS NÃO PREENCHIDOs -->
+					<p:graphicImage value="/resources/img/alerta.png" width="30px"
+						title="#{msg['error.qualificador.pendente']}"
+						style="margin-left:10%"
+						rendered="#{movimentacaoPrestadorBean.renderizaAlertaDependente(dependente)}" />
+
+					<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+						<p:commandButton value="#{msg['btn.dialog.yes']}"
+							styleClass="ui-confirmdialog-yes" icon="fa fa-check" />
+						<p:commandButton value="#{msg['btn.dialog.no']}"
+							styleClass="ui-confirmdialog-no" icon="fa fa-close" />
+					</p:confirmDialog>
+
+				</p:column>
+
+				<f:facet name="footer">
+					<h:panelGrid id="gridFooter" styleClass="semBorda"
+						style="text-align:left">
+						<p:commandButton icon="fa fa-plus"
+							actionListener="#{movimentacaoPrestadorBean.novoDependente()}"
+							update="formDialogCadastroDependente" immediate="true"
+							oncomplete="PF('itemDependenteDialog').show();">
+							<o:ignoreValidationFailed />
+						</p:commandButton>
+					</h:panelGrid>
+				</f:facet>
+			</p:dataTable>
+
+			<p:panelGrid columns="1" layout="grid" id="gridFooterDependentes">
+				<p:commandButton value="#{msg['btn.salvarParcial']}"
+					rendered="#{movimentacaoPrestadorBean.editEntity.situacao eq 'ANALISE' ? false:true}"
+					icon="fa fa-save" update="textoUltimaMovimentacao"
+					action="#{movimentacaoPrestadorBean.salvarParcial()}">
+				</p:commandButton>
+			</p:panelGrid>
+
+		</p:panel>
+	</p:tab>
+
+</ui:composition>

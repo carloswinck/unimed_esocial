@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/template_base.xhtml">
+
+	<ui:define name="sistema_titulo">
+		<h:outputText value="#{msg['sistema.sigla']}" />
+	</ui:define>
+	
+	<ui:define name="body">
+		<div class="login" style="height: 340px;">
+			<div class="box">
+				<h3>
+					<h:outputText value="#{msg['main.app.description']}" /> - <h:outputText value="#{cmsg['login.login']}" />
+				</h3>
+				<p:messages autoUpdate="true" globalOnly="true" />
+				<h:form>
+<!-- 					<f:metadata> -->
+<!-- 					    <f:viewParam id="key" name="key" value="#{loginBean.key}"/> -->
+<!-- 					</f:metadata> -->
+				
+					<p:panelGrid columns="1" layout="grid" style="width:250px;">
+						<p:outputLabel for="cpf" value="#{msg['movimentacaoPrestador.preCadastro.cpfPrestador']}"   />
+						<p:inputMask id="cpf" required="true" value="#{loginBean.cpf}" validator="cPFValidator" mask="999.999.999-99" />
+						<p:message for="cpf" display="text" />
+						
+						<p:outputLabel for="email" value="#{msg['movimentacaoPrestador.preCadastro.email']}" />
+						<p:inputText id="email" validator="vEmailValidator" value="#{loginBean.email}" required="true" />
+						<p:message for="email" display="text" />
+					</p:panelGrid>
+					<br />
+					<p:commandButton id="submit" value="#{msg['btn.entrar']}" action="#{loginBean.login()}" ajax="false" />
+				</h:form>
+			</div>
+		</div>
+	</ui:define>
+</ui:composition>

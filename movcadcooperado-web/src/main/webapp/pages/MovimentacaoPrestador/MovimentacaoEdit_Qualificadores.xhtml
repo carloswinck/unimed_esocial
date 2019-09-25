@@ -1,0 +1,126 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+
+	<!-- 				Tab qualificadores -->
+	<p:tab id="qualificadores"
+		title="#{msg['movimentacao.prestador.dadosQualificadores']}"
+		titleStyleClass="tabAlign">
+		<p:panel header="#{msg['movimentacao.prestador.dadosQualificadores']}">
+
+			<!--   				PARTICIPA NOTIVISA -->
+			<h:panelGrid columns="2">
+				<p:selectBooleanCheckbox id="notivisa"
+					value="#{movimentacaoPrestadorBean.editEntity.notivisa}" />
+				<p:outputLabel for="notivisa"
+					title="#{msg['movimentacaoPrestador.notivisa.msg']}"
+					value="#{msg['movimentacaoPrestador.notivisa']}" />
+			</h:panelGrid>
+
+			<p:dataTable rows="5" id="tabelaCurriculos" style="margin-top:1%"
+				emptyMessage="#{msg['informativo.formacao.vazia']}" reflow="true"
+				value="#{movimentacaoPrestadorBean.editEntity.movimentacaoPrestadorCurriculos}"
+				paginator="true" sortBy="#{curriculo.tipoCursoEnum.codigo}"
+				paginatorPosition="bottom" var="curriculo">
+
+				<!-- 							TIPO DO CURSO -->
+				<p:column
+					headerText="#{msg['movimentacaoPrestadorCurriculo.tipoCursoEnum']}"
+					width="15%">
+					<h:outputText value="#{curriculo.tipoCursoEnum.descricao}" />
+				</p:column>
+
+				<!-- 							CURSO -->
+				<p:column width="20%"
+					headerText="#{msg['movimentacaoPrestadorCurriculo.curso']}">
+					<h:outputText value="#{curriculo.curso}" />
+				</p:column>
+
+				<!-- 							INSTITUIÇÃO -->
+				<p:column
+					headerText="#{msg['movimentacaoPrestadorCurriculo.entidadeEnsino']}">
+					<h:outputText
+						value="#{curriculo.entidadeEnsino eq null ? '' : curriculo.entidadeEnsino.descricao}" />
+				</p:column>
+
+				<!-- 							CONCLUSÃO -->
+				<p:column
+					headerText="#{msg['movimentacaoPrestadorCurriculo.dataConclusao']}"
+					width="15%">
+					<h:outputText value="#{curriculo.dataConclusao}">
+						<f:convertDateTime pattern="MM/yyyy" locale="pt" />
+					</h:outputText>
+				</p:column>
+
+				<!-- 							AÇÕES -->
+				<p:column headerText="#{msg['label.acao']}"
+					rendered="#{movimentacaoPrestadorBean.editarCurriculo}">
+
+					<!-- 								EDITAR FORMAÇÃO -->
+					<p:commandButton icon="fa fa-fw fa-edit"
+						action="#{movimentacaoPrestadorBean.editarItemCurriculo(curriculo)}"
+						update="tabelaCurriculos, :formDialogCurriculo"
+						oncomplete="PF('itemCurriculoDialog').show();">
+
+						<f:setPropertyActionListener
+							target="#{movimentacaoPrestadorBean.editEntity.itemCurriculo}"
+							value="#{curriculo}" />
+					</p:commandButton>
+					<p:graphicImage value="/resources/img/alerta.png" width="30px"
+						title="#{msg['error.qualificador.pendente']}"
+						style="margin-left:10%"
+						rendered="#{movimentacaoPrestadorBean.renderizaAlertaCurriculo(curriculo)}" />
+
+					<!-- 								EXCLUIR FORMAÇÃO -->
+					<p:commandButton icon="fa fa-trash" style="margin-left:10%"
+						rendered="#{empty curriculo.curriculoPrestadorVO}"
+						action="#{movimentacaoPrestadorBean.excluirItemCurriculo()}"
+						update="tabelaCurriculos">
+						<p:confirm header="#{msg['informativo.formacao.confirmacao']}"
+							message="#{msg['informativo.formacao.confirmacao.message']}"
+							icon="fa fa-warning" />
+						<f:setPropertyActionListener
+							target="#{movimentacaoPrestadorBean.editEntity.itemCurriculo}"
+							value="#{curriculo}" />
+					</p:commandButton>
+
+					<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+						<p:commandButton value="#{msg['btn.dialog.yes']}"
+							styleClass="ui-confirmdialog-yes" icon="fa fa-check" />
+						<p:commandButton value="#{msg['btn.dialog.no']}"
+							styleClass="ui-confirmdialog-no" icon="fa fa-close" />
+					</p:confirmDialog>
+
+				</p:column>
+
+				<f:facet name="footer">
+					<h:panelGrid id="gridFooter" styleClass="semBorda"
+						style="text-align:left">
+						<p:commandButton icon="fa fa-plus"
+							actionListener="#{movimentacaoPrestadorBean.novaFormacao()}"
+							update="formDialogCurriculo" immediate="true"
+							oncomplete="PF('itemCurriculoDialog').show();">
+							<o:ignoreValidationFailed />
+						</p:commandButton>
+					</h:panelGrid>
+				</f:facet>
+			</p:dataTable>
+
+			<p:panelGrid columns="1" layout="grid" id="gridFooterQualificadores">
+				<p:commandButton value="#{msg['btn.salvarParcial']}"
+					rendered="#{movimentacaoPrestadorBean.editEntity.situacao eq 'ANALISE' ? false:true}"
+					icon="fa fa-save" update="textoUltimaMovimentacao"
+					action="#{movimentacaoPrestadorBean.salvarParcial()}">
+				</p:commandButton>
+			</p:panelGrid>
+		</p:panel>
+
+	</p:tab>
+
+</ui:composition>

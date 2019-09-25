@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+	xmlns:p="http://primefaces.org/ui"
+	template="${(request.userPrincipal != null) ? '/templates/template.xhtml' : '/templates/template_base.xhtml' }">
+	<ui:define name="body">
+		<div class="msg_error">
+			<h3><h:outputText value="#{msg['msg.erro.sessao']}" styleClass="titulo" /></h3>
+
+			<p:messages ajaxRendered="true" />
+
+			<h:outputText value="#{msg['msg.erro.sessao.2']}" styleClass="contato" />
+			<h:form>
+				<p:commandButton value="#{msg['btn.fazer.login']}" action="/pages/home.jsf?faces-redirect=true" ajax="false" />
+			</h:form>
+		</div>
+	</ui:define>
+</ui:composition>

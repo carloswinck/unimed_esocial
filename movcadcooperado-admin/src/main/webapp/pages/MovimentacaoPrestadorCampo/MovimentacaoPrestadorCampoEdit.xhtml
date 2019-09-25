@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	template="/templates/template.xhtml" xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+	<ui:define name="body">
+		<o:form id="campos" prependId="false">
+
+			<h3>
+				<h:outputText value="#{msg['main.app.description']}" />
+			</h3>
+
+			<p:wizard widgetVar="wiz" nextLabel="#{msg['btn.avancar']}"
+				backLabel="#{msg['btn.voltar']}" showStepStatus="true"
+				step="#{movimentacaoPrestadorCampoBean.currentStep}"
+				flowListener="#{movimentacaoPrestadorCampoBean.onFlowProcess}">
+
+				<!-- TAB DADOS PRESTADOR -->
+				<ui:include
+					src="/pages/MovimentacaoPrestadorCampo/MovimentacaoPrestadorCampoEdit_DadosPrestador.xhtml" />
+
+				<!-- TAB DADOS FINANCEIROS -->
+				<ui:include
+					src="/pages/MovimentacaoPrestadorCampo/MovimentacaoPrestadorCampoEdit_Financeiro.xhtml" />
+
+				<!-- TAB ENDERECO/DADOS ATENDIMENTO-->
+				<ui:include
+					src="/pages/MovimentacaoPrestadorCampo/MovimentacaoPrestadorCampoEdit_Endereco_DadosAtendimento.xhtml" />
+
+				<!-- TAB QUALIFICADORES -->
+				<ui:include
+					src="/pages/MovimentacaoPrestadorCampo/MovimentacaoPrestadorCampoEdit_Qualificadores.xhtml" />
+
+				<!-- TAB DEPENDENTE CAMPOS -->
+				<ui:include
+					src="/pages/MovimentacaoPrestadorCampo/MovimentacaoPrestadorCampoEdit_Dependentes.xhtml" />
+
+				<!-- TAB HORARIOS -->
+				<ui:include
+					src="/pages/MovimentacaoPrestadorCampo/MovimentacaoPrestadorCampoEdit_Horario.xhtml" />
+
+				<!-- TAB ESPECIALIDADE -->
+				<ui:include
+					src="/pages/MovimentacaoPrestadorCampo/MovimentacaoPrestadorCampoEdit_Especialidade.xhtml" />
+
+			</p:wizard>
+		</o:form>
+
+		<!-- DIALOG PARA CONFIGURAR A PARAMETRIZACAO DOS CAMPOS -->
+		<p:dialog id="campoDialog" modal="true" widgetVar="campoDialog"
+			responsive="true" resizable="false" closable="false"
+			position="center center" onShow="PF('campoDialog').initPosition()"
+			header="#{msg['informativo.campo.editar.dialog.head']}">
+			<h:form id="formDialogCampos">
+				<h:panelGrid columns="1" width="100%" style="margin-top:1%">
+					<p:outputLabel for="tabelaCampo"
+						value="#{msg['movimentacao.prestador.campo.dialog.label.tabela']}" />
+					<p:outputLabel id="tabelaCampo"
+						value="#{movimentacaoPrestadorCampoBean.movimentacaoPrestadorCampo.tabela.nome}" />
+
+					<p:outputLabel for="campoCampo"
+						value="#{msg['movimentacao.prestador.campo.dialog.label.campo']}" />
+					<p:outputLabel id="campoCampo"
+						value="#{movimentacaoPrestadorCampoBean.movimentacaoPrestadorCampo.campoNome}" />
+
+					<p:outputLabel for="legendaCampo"
+						value="#{msg['movimentacao.prestador.campo.dialog.label.legenda']}" />
+					<p:outputLabel id="legendaCampo"
+						value="#{movimentacaoPrestadorCampoBean.movimentacaoPrestadorCampo.legenda}" />
+				</h:panelGrid>
+				<p:fieldset>
+					<h:panelGrid columns="2" width="100%" style="margin-top:1%">
+						<p:selectBooleanCheckbox id="anexoCampo"
+							value="#{movimentacaoPrestadorCampoBean.movimentacaoPrestadorCampo.anexo}" />
+						<p:outputLabel for="anexoCampo"
+							value="#{msg['movimentacao.prestador.campo.dialog.label.anexo']}" />
+
+						<p:selectBooleanCheckbox id="analiseCampo"
+							value="#{movimentacaoPrestadorCampoBean.movimentacaoPrestadorCampo.analise}" />
+						<p:outputLabel for="analiseCampo"
+							value="#{msg['movimentacao.prestador.campo.dialog.label.analise']}" />
+
+						<p:selectBooleanCheckbox id="obrigatorioCampo"
+							value="#{movimentacaoPrestadorCampoBean.movimentacaoPrestadorCampo.obrigatorio}" />
+						<p:outputLabel for="obrigatorioCampo"
+							value="#{msg['movimentacao.prestador.campo.dialog.label.obrigatorio']}" />
+
+						<p:selectBooleanCheckbox id="desativarCampo"
+							value="#{movimentacaoPrestadorCampoBean.movimentacaoPrestadorCampo.disable}" />
+						<p:outputLabel for="desativarCampo"
+							value="#{msg['movimentacao.prestador.campo.desativar']}" />
+
+					</h:panelGrid>
+				</p:fieldset>
+				<h:panelGrid columns="2" width="100%" style="margin-top:1%">
+					<p:commandButton value="#{msg['btn.salvar']}" icon="fa fa-save"
+						actionListener="#{movimentacaoPrestadorCampoBean.atualizarCampo()}"
+						oncomplete="handleCampoDialog(xhr, status, args)"
+						update="tabelaDadosPrestador, tabelaFinanceiro, tabelaAtendimentoEndereco, tabelaQualificadores, tabelaDependentesCampos, tabelaHorario, tabelaEspecialidade, @form" />
+
+					<p:commandButton value="#{msg['btn.fechar']}" icon="fa fa-close"
+						oncomplete="PF('campoDialog').hide();">
+					</p:commandButton>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<script>
+			function handleCampoDialog(xhr, status, args) {
+				if (!args.validationFailed) {
+					PF('campoDialog').hide();
+				}
+			}
+		</script>
+
+	</ui:define>
+</ui:composition>

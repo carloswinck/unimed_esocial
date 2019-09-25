@@ -1,0 +1,163 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<!-- 				Tab dados de endereço -->
+	<p:tab id="enderecoResidencial"
+		title="#{msg['movimentacao.prestador.dadosEndereco']}">
+		<p:panel id="panelEndereco"
+			header="#{msg['movimentacao.prestador.dadosEndereco']}">
+			<p:panelGrid columns="3" layout="grid" id="gridEnderecoResidencial">
+				<!-- 	 CEP -->
+				<h:panelGrid>
+					<p:outputLabel for="cep"
+						value="#{msg['movimentacaoPrestadorEndereco.cep']}" />
+					<h:panelGrid columns="2" width="5%">
+						<p:inputMask id="cep" disabled="true" required="true"
+							title="#{msg['movimentacaoPrestadorEndereco.cep.msg']}"
+							value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorEnderecoPreCadastro.cep}"
+							style="width:43%; min-width:68px" mask="99999-999">
+						</p:inputMask>
+						<p:commandButton
+							action="#{movimentacaoPrestadorPreCadastroBean.adicionarEndereco()}"
+							immediate="true" icon="fa fa-pencil">
+						</p:commandButton>
+					</h:panelGrid>
+					<p:message id="msgCep" for="cep" display="text" />
+				</h:panelGrid>
+
+				<!-- 	 LOGRADOURO -->
+				<h:panelGrid style="width:100%">
+					<p:outputLabel for="logradouro"
+						value="#{msg['movimentacaoPrestadorEndereco.logradouro']}" />
+					<p:inputText id="logradouro" style="width:100%" disabled="true"
+						required="true" onblur="converteMaiuscula(this)"
+						value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorEnderecoPreCadastro.logradouro}"
+						maxlength="80">
+						<pe:keyFilter regEx="/[A-Z0-9\.\_\-\s]/i" />
+						<f:validateLength minimum="1" maximum="80" />
+						<p:ajax partialSubmit="true" event="change" update="@parent" />
+					</p:inputText>
+					<p:message for="logradouro" display="text" />
+				</h:panelGrid>
+
+				<!-- 	NUMERO -->
+				<h:panelGrid>
+					<p:outputLabel for="numero"
+						value="#{msg['movimentacaoPrestadorEndereco.numero']}" />
+					<p:inputText id="numero" style="width:43%;" maxlength="10"
+						required="true"
+						value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorEnderecoPreCadastro.numero}">
+						<f:validateLength minimum="1" maximum="10" />
+						<pe:keyFilter regEx="/[0-9]/i" />
+					</p:inputText>
+					<p:message for="numero" display="text" />
+				</h:panelGrid>
+
+				<!-- 	COMPLEMENTO -->
+				<h:panelGrid>
+					<p:outputLabel for="complemento"
+						value="#{msg['movimentacaoPrestadorEndereco.complemento']}" />
+					<p:inputText id="complemento" maxlength="20"
+						onblur="converteMaiuscula(this)"
+						value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorEnderecoPreCadastro.complemento}">
+						<f:validateLength minimum="1" maximum="20" />
+					</p:inputText>
+					<p:message for="complemento" display="text" />
+				</h:panelGrid>
+
+				<!-- 	BAIRRO -->
+				<h:panelGrid>
+					<p:outputLabel for="bairro"
+						value="#{msg['movimentacaoPrestadorEndereco.bairro']}" />
+					<p:inputText id="bairro" style="width:100%" maxlength="60"
+						onblur="converteMaiuscula(this)" disabled="true"
+						value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorEnderecoPreCadastro.bairro}">
+						<p:ajax partialSubmit="true" event="change" update="@parent" />
+					</p:inputText>
+					<p:message for="bairro" display="text" />
+				</h:panelGrid>
+
+				<!-- 	ESTADO RESIDENCIAL -->
+				<h:panelGrid id="gridEstadoResidencial" style="text-align: left">
+					<p:outputLabel for="estadoResidencial"
+						value="#{msg['movimentacaoPrestadorEndereco.estado']}" />
+					<p:selectOneMenu id="estadoResidencial" disabled="true"
+						converter="#{vEntityConverter}"
+						value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorEnderecoPreCadastro.estado}">
+						<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+							noSelectionOption="true" />
+						<f:selectItems
+							value="#{movimentacaoPrestadorPreCadastroBean.estadosList}"
+							var="e" itemLabel="#{e.sigla}" />
+						<p:ajax
+							update=" gridMunicipioResidencial, gridEstadoResidencial, @this"
+							event="change" partialSubmit="true" />
+					</p:selectOneMenu>
+					<p:message for="estadoResidencial" display="text" />
+				</h:panelGrid>
+
+				<!-- 	MUNICIPIO RESIDENCIAL -->
+				<h:panelGrid id="gridMunicipioResidencial" style="text-align: left">
+					<p:outputLabel for="municipioResidencial"
+						value="#{msg['movimentacaoPrestadorEndereco.municipio']}" />
+					<p:selectOneMenu id="municipioResidencial" disabled="true"
+						converter="#{vEntityConverter}"
+						value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorEnderecoPreCadastro.municipio}">
+						<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+							noSelectionOption="true" />
+						<f:selectItems
+							value="#{movimentacaoPrestadorPreCadastroBean.getMunicipiosEstado(movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorEnderecoPreCadastro.estado)}"
+							var="e" itemLabel="#{e.nome}" />
+						<p:ajax partialSubmit="true" update="@parent" event="change" />
+					</p:selectOneMenu>
+					<p:message for="municipioResidencial" display="text" />
+				</h:panelGrid>
+
+				<!-- 	TELEFONE RESIDENCIAL -->
+				<h:panelGrid columns="1">
+					<p:outputLabel for="numero1"
+						value="#{msg['movimentacaoPrestadorEndereco.residencial']}" />
+					<h:panelGrid columns="3" columnClasses="alinhaDdd1, alinhaPrefixo1">
+						<h:column>
+							<p:inputText id="ddd1"
+								title="#{msg['movimentacaoPrestadorEndereco.ddd1.msg']}"
+								required="true"
+								value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorEnderecoPreCadastro.ddd1}"
+								maxlength="2" style="width:70%; min-width:70%">
+								<f:validateLongRange minimum="11" maximum="99" />
+								<f:validateLength minimum="2" maximum="2" />
+								<pe:keyFilter regEx="/[\d]/" />
+							</p:inputText>
+						</h:column>
+						<h:column>
+							<p:inputText id="prefixoNumero1" required="true"
+								value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorEnderecoPreCadastro.prefixo1}"
+								maxlength="5" style="width:75%; min-width:75%">
+								<f:validateLength minimum="4" maximum="5" />
+								<pe:keyFilter regEx="/[\d]/" />
+							</p:inputText>
+						</h:column>
+						<h:column>
+							<p:inputText id="numero1" required="true"
+								value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorEnderecoPreCadastro.numero1}"
+								maxlength="4" style="width:30%; min-width:30%">
+								<f:validateLength minimum="4" maximum="4" />
+								<pe:keyFilter regEx="/[\d]/" />
+							</p:inputText>
+						</h:column>
+					</h:panelGrid>
+					<p:message for="ddd1" display="text" />
+					<p:message for="prefixoNumero1" display="text" />
+					<p:message for="numero1" display="text" />
+				</h:panelGrid>
+			</p:panelGrid>
+
+		</p:panel>
+	</p:tab>
+</ui:composition>

@@ -1,0 +1,66 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<!-- TAB DE DADOS PESSOAIS -->
+	<p:tab id="dadosPessoais"
+		title="#{msg['movimentacao.prestador.dadosPessoais']}">
+		<p:panel header="#{msg['movimentacao.prestador.dadosPessoais']}">
+			<p:panelGrid columns="1" layout="grid" style="text-align:left">
+
+				<!-- CPF -->
+				<h:panelGrid>
+					<p:outputLabel for="cpf"
+						value="#{msg['movimentacaoPrestador.preCadastro.cpfPrestador']}" />
+					<p:inputMask id="cpf" disabled="false" required="true"
+						value="#{movimentacaoPrestadorPreCadastroBean.editEntity.cpfPrestador}"
+						validator="cPFValidator" style="width:25%; min-width:110px "
+						mask="999.999.999-99">
+						<p:ajax event="change" update="@this, msgCPF" partialSubmit="true"
+							global="false" />
+					</p:inputMask>
+					<p:message id="msgCPF" for="cpf" display="text" />
+				</h:panelGrid>
+
+				<!-- NOME COMPLETO -->
+				<h:panelGrid style="width:80% !important;">
+					<p:outputLabel for="nomeCompleto"
+						value="#{msg['movimentacaoPrestador.preCadastro.nomePrestador']}" />
+					<p:inputText id="nomeCompleto" required="true"
+						title="#{msg['movimentacaoPrestador.nomePrestador.msg']}"
+						style="width:50% !important;" maxlength="70"
+						value="#{movimentacaoPrestadorPreCadastroBean.editEntity.nomePrestador}"
+						validator="nomeValidator" onchange="converteMaiuscula(this)">
+						<f:validateLength minimum="1" maximum="70" />
+						<pe:keyFilter regEx="/[A-ZzÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]/i" />
+						<p:ajax partialSubmit="true" global="false"
+							update="@this msgNomeCompleto" event="change" />
+					</p:inputText>
+					<p:message id="msgNomeCompleto" for="nomeCompleto" display="text" />
+				</h:panelGrid>
+
+				<!-- E-MAIL -->
+				<h:panelGrid style="width:80% !important;">
+					<p:outputLabel for="email"
+						value="#{msg['movimentacaoPrestador.preCadastro.email']}" />
+					<p:inputText id="email" style="width:50% !important;"
+						required="true" maxlength="60"
+						value="#{movimentacaoPrestadorPreCadastroBean.editEntity.email}"
+						validator="vEmailValidator">
+						<f:validateLength minimum="1" maximum="60" />
+						<pe:keyFilter regEx="/[A-Z0-9\.\@\_\-]/i" />
+						<p:ajax event="change" update="@this,emailMessage"
+							partialSubmit="true" global="false" />
+					</p:inputText>
+					<p:message id="emailMessage" for="email" display="text" />
+				</h:panelGrid>
+
+			</p:panelGrid>
+		</p:panel>
+	</p:tab>
+</ui:composition>

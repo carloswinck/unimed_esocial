@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	template="/templates/template.xhtml" xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<ui:define name="body">
+
+		<o:form id="prestador" prependId="false">
+
+			<h3>
+				<h:outputText value="#{msg['main.app.description']}" />
+			</h3>
+			<h6>
+				<h:outputText value="#{msg['label.campos.obrigatorios']}" />
+			</h6>
+			<h6>
+				<h:outputText id="textoUltimaMovimentacao"
+					style="font-weight: bold;"
+					value="#{movimentacaoPrestadorBean.ultimaMovimentacao}" />
+			</h6>
+
+			<!-- CARREGA O TEXTO DE ULTIMA MOVIMENTACAO APOS O CARREGAMENTO DA PAGINA -->
+			<p:remoteCommand autoRun="true"
+				actionListener="#{movimentacaoPrestadorBean.montaUltimaMovimentacaoTexto()}"
+				update="textoUltimaMovimentacao" id="remote" />
+
+			<p:messages autoUpdate="true" globalOnly="true" closable="true" />
+
+			<p:wizard widgetVar="wiz" nextLabel="#{msg['btn.avancar']}"
+				backLabel="#{msg['btn.voltar']}" showStepStatus="true"
+				step="#{movimentacaoPrestadorBean.currentStep}"
+				flowListener="#{movimentacaoPrestadorBean.onFlowProcess}">
+
+				<!-- 				Tab de dados pessoais -->
+				<ui:include
+					src="/pages/MovimentacaoPrestador/MovimentacaoEdit_DadosPessoais.xhtml" />
+
+				<!-- 				Tab de dados complementares -->
+				<ui:include
+					src="/pages/MovimentacaoPrestador/MovimentacaoEdit_DadosComplementares.xhtml" />
+
+				<!-- 				Tab dados financeiros -->
+				<ui:include
+					src="/pages/MovimentacaoPrestador/MovimentacaoEdit_DadosFinanceiros.xhtml" />
+
+				<!-- 				Tab dados de endereço -->
+				<ui:include
+					src="/pages/MovimentacaoPrestador/MovimentacaoEdit_EndResidencial.xhtml" />
+
+				<!-- 				Tab qualificadores -->
+				<ui:include
+					src="/pages/MovimentacaoPrestador/MovimentacaoEdit_Qualificadores.xhtml" />
+
+				<!-- 				Tab dependentes -->
+				<ui:include
+					src="/pages/MovimentacaoPrestador/MovimentacaoEdit_Dependentes.xhtml" />
+
+				<!--           		Tab Upload File -->
+				<ui:include
+					src="/pages/MovimentacaoPrestador/MovimentacaoEdit_DadosAtendimento.xhtml" />
+
+				<!-- 				Tab Especialidade -->
+				<ui:include
+					src="/pages/MovimentacaoPrestador/MovimentacaoEdit_Especialidade.xhtml" />
+
+				<!-- 				Tab anexos -->
+				<ui:include
+					src="/pages/MovimentacaoPrestador/MovimentacaoEdit_UploadFiles.xhtml" />
+
+			</p:wizard>
+
+		</o:form>
+
+		<!--        ADICIONA A MODAL DE TEXTO INTRODUTORIO-->
+		<f:metadata>
+			<f:viewAction action="PF('textoIntrodutorioDialog').show()"
+				onPostback="true" />
+		</f:metadata>
+
+		<!--        DIALOG TEXTO/AVISO GENERICO -->
+		<p:dialog id="textoGenericoDialog" closable="false"
+			header="#{msg['texto.generico.head']}" resizable="false"
+			responsive="true" widgetVar="textoGenericoDialog" modal="true"
+			position="center" closeOnEscape="true">
+			<p:panelGrid columns="1" layout="grid">
+				<h:outputText
+					value="#{movimentacaoPrestadorBean.textoMensagemGenerica}"
+					escape="false" />
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" id="gridFooterTextoGenerico">
+				<p:commandButton oncomplete="PF('textoGenericoDialog').hide()"
+					value="#{msg['btn.ok']}" />
+			</p:panelGrid>
+		</p:dialog>
+
+		<!--        DIALOG TEXTO INTRODUTORIO -->
+		<p:dialog id="textoIntrodutorioDialog" closable="false" visible="true"
+			header="#{msg['texto.introdutorio.head']}" resizable="false"
+			responsive="true" widgetVar="textoIntrodutorioDialog" modal="true"
+			position="center" closeOnEscape="true">
+			<p:panelGrid columns="1" layout="grid" style="text-align: left;">
+				<h:outputText
+					value="#{movimentacaoPrestadorBean.verificarMensagemTextoIntrodutorio()}"
+					escape="false" style="white-space: pre-line; text-align: left;" />
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid"
+				id="gridFooterTextoIntrodutorio">
+				<p:commandButton oncomplete="PF('textoIntrodutorioDialog').hide()"
+					value="#{msg['btn.ok']}" />
+			</p:panelGrid>
+		</p:dialog>
+
+		<!-- 		DIALOG PARA INFORMAR A NAO POSSIBILIDADE DE ALTERAR O ENDERECO -->
+		<p:dialog id="enderecoAlteradoHoje" widgetVar="enderecoAlteradoHoje"
+			header="#{msg['texto.endereco.alterado.hoje.head']}"
+			responsive="true" modal="true" position="center" closeOnEscape="true">
+			<p:panelGrid columns="1" layout="grid">
+				<h:outputText value="#{msg['texto.endereco.alterado.hoje.body']}"
+					escape="false" />
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid"
+				id="gridFooterEnderecoAlteradoHoje">
+				<p:commandButton oncomplete="PF('enderecoAlteradoHoje').hide();"
+					value="#{msg['btn.ok']}" />
+			</p:panelGrid>
+		</p:dialog>
+
+		<!-- 		DIALOG COM A LISTA DE LOGRADOUROS -->
+		<p:dialog id="listaLogradouros" widgetVar="itemLogradouros"
+			responsive="true"
+			header="#{msg['label.dialog.selecione.logradouro']}"
+			closeOnEscape="true" modal="true" position="center">
+			<h:form id="formListLogradouros">
+
+				<p:panelGrid layout="grid" id="gridPesquisaLogradouro" columns="1">
+					<h:panelGrid>
+						<h:outputText value="#{msg['informativo.help.cep']}"
+							style="font-weight: bold;font-size: 13px" />
+
+					</h:panelGrid>
+					<!-- 						    CEP -->
+					<h:panelGrid id="idPesquisaCep" style="text-align:left">
+						<p:outputLabel for="cepPesquisa"
+							value="#{msg['movimentacaoPrestadorEndereco.cep']}" />
+						<h:panelGrid columns="2" width="5%">
+							<p:inputMask id="cepPesquisa" required="true"
+								title="#{msg['movimentacaoPrestadorEndereco.cep.msg']}"
+								value="#{movimentacaoPrestadorBean.cepPesquisa}"
+								style="width:43%; min-width:68px" mask="99999-999">
+
+							</p:inputMask>
+							<p:commandButton icon="fa fa-search"
+								action="#{movimentacaoPrestadorBean.onChangeCep()}"
+								update="tabelaLogradouros, idPesquisaCep " />
+						</h:panelGrid>
+						<p:message id="msgCep" for="cepPesquisa" display="text" />
+					</h:panelGrid>
+
+					<!-- 					LISTA DE LOGRADOUROS		 -->
+					<p:dataTable rows="5" id="tabelaLogradouros" style="margin-top:1%"
+						emptyMessage="#{msg['informativo.logradouro.vazio']}"
+						reflow="true" value="#{movimentacaoPrestadorBean.logradourosList}"
+						paginator="true" paginatorPosition="bottom" var="logradouro">
+
+						<p:column headerText="#{msg['movimentacaoPrestadorEndereco.cep']}"
+							width="9%">
+							<h:outputText value="#{logradouro.cep}" />
+						</p:column>
+
+						<p:column
+							headerText="#{msg['movimentacaoPrestadorEndereco.logradouro']}"
+							filterPosition="bottom" filterBy="#{logradouro.logradouro}"
+							width="150" filterStyle="width: 95%" filterMaxLength="30"
+							filterMatchMode="contains">
+							<h:outputText value="#{logradouro.logradouro}" />
+						</p:column>
+
+						<p:column
+							headerText="#{msg['movimentacaoPrestadorEndereco.bairro']}"
+							width="10%">
+							<h:outputText value="#{logradouro.bairro}" />
+						</p:column>
+
+						<p:column
+							headerText="#{msg['movimentacaoPrestadorEndereco.municipio']}"
+							width="10%">
+							<h:outputText value="#{logradouro.municipio.nome}" />
+						</p:column>
+
+						<p:column
+							headerText="#{msg['movimentacaoPrestadorEndereco.estado']}"
+							width="5%">
+							<h:outputText value="#{logradouro.estado.sigla}" />
+						</p:column>
+
+						<p:column headerText="#{msg['label.selecione']}" width="10%">
+							<p:commandButton icon="fa fa-check"
+								action="#{movimentacaoPrestadorBean.adicionaItemLogradouro()}"
+								update="gridEnderecoResidencial, :formDialogEnderecoAtendimento, :formDialogEnderecoAtendimento:gridEnderecoAtendimento"
+								oncomplete="PF('itemLogradouros').hide();">
+								<f:setPropertyActionListener
+									target="#{movimentacaoPrestadorBean.logradouroItem}"
+									value="#{logradouro}" />
+							</p:commandButton>
+						</p:column>
+
+					</p:dataTable>
+					<p:commandButton value="#{msg['btn.fechar']}" icon="fa fa-close"
+						oncomplete="PF('itemLogradouros').hide();" />
+				</p:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+		<!-- DIALOG  EDIÇÃO/CRIAÇÃO DE FORMAÇÃO -->
+		<p:dialog id="itemCurriculoDialog" widgetVar="itemCurriculoDialog"
+			styleClass="ui-dialog" responsive="true"
+			header="#{msg['btn.nova.formacao']}" closeOnEscape="true"
+			modal="true" position="center">
+			<o:form id="formDialogCurriculo">
+				<p:panelGrid columns="3" id="gridEdicao" styleClass="semBorda"
+					layout="grid">
+
+					<!-- TIPO CURSO  -->
+					<h:panelGrid style="text-align:left">
+						<p:outputLabel for="tipoCurso"
+							value="#{msg['movimentacaoPrestadorCurriculo.tipoCursoEnum']}" />
+						<p:selectOneMenu id="tipoCurso"
+							disabled="#{movimentacaoPrestadorBean.isDisable('TIPOCURSO')}"
+							required="#{movimentacaoPrestadorBean.isRequired('TIPOCURSO')}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorCurriculo.tipoCursoEnum}">
+							<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems
+								value="#{movimentacaoPrestadorBean.tipoCursoList()}" var="e"
+								itemLabel="#{e.descricao}" />
+						</p:selectOneMenu>
+						<p:message for="tipoCurso" display="text" />
+					</h:panelGrid>
+
+					<!-- DATA DE INICIO -->
+					<h:panelGrid id="gridDataInicio" style="text-align:left">
+						<h:panelGrid style="white-space:nowrap;">
+							<p:outputLabel for="dataInicio"
+								value="#{msg['movimentacaoPrestadorCurriculo.dataInicial']}" />
+
+							<p:calendar id="dataInicio" yearRange="-116:" maxdate="#{now}"
+								validator="#{movimentacaoPrestadorBean.validarMaiorDataIncioCurriculo}"
+								mindate="#{movimentacaoPrestadorBean.editEntity.dataNascimento}"
+								disabled="#{movimentacaoPrestadorBean.isDisable('DATAINICIAL')}"
+								required="#{movimentacaoPrestadorBean.isRequired('DATAINICIAL')}"
+								mask="true" showOn="button"
+								value="#{movimentacaoPrestadorBean.movimentacaoPrestadorCurriculo.dataInicial}"
+								navigator="true" pattern="dd/MM/yyyy">
+								<p:ajax event="dateSelect"
+									update="gridConclusao, gridDataInicio" partialSubmit="true" />
+								<p:ajax event="change" update="gridConclusao, gridDataInicio"
+									partialSubmit="true" />
+							</p:calendar>
+						</h:panelGrid>
+						<h:panelGrid>
+							<p:message for="dataInicio" display="text" />
+						</h:panelGrid>
+					</h:panelGrid>
+
+					<!-- DATA DE CONCLUSÃO -->
+					<h:panelGrid id="gridConclusao" style="white-space:nowrap;">
+						<p:outputLabel for="dataFim"
+							value="#{msg['movimentacaoPrestadorCurriculo.dataConclusao']}" />
+						<p:calendar id="dataFim"
+							validator="#{movimentacaoPrestadorBean.validarMaiorDataConclusaoCurriculo}"
+							mindate="#{movimentacaoPrestadorBean.movimentacaoPrestadorCurriculo.dataInicial}"
+							showOn="button" maxdate="#{now}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('DATACONCLUSAO')}"
+							required="#{movimentacaoPrestadorBean.isRequired('DATACONCLUSAO')}"
+							mask="true" yearRange="-116:"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorCurriculo.dataConclusao}"
+							style="width:12%" navigator="true" pattern="dd/MM/yyyy">
+							<p:ajax event="dateSelect" update="gridConclusao, gridDataInicio"
+								partialSubmit="true" />
+							<p:ajax event="change" update="gridConclusao, gridDataInicio"
+								partialSubmit="true" />
+						</p:calendar>
+						<h:panelGrid>
+							<p:message for="dataFim" display="text" />
+							<o:validateOrder id="order" type="lte"
+								components="dataInicio dataFim"
+								message="#{msg['informativo.dataInvalida.inicio']}"
+								showMessageFor="dataInicio" />
+						</h:panelGrid>
+					</h:panelGrid>
+				</p:panelGrid>
+				<h:panelGrid columns="1">
+
+					<!-- ÁREA DO CURSO -->
+					<h:panelGrid style="text-align:left">
+						<p:outputLabel for="areaCurso"
+							value="#{msg['movimentacaoPrestadorCurriculo.areaCurso']}" />
+						<p:selectOneMenu id="areaCurso" filter="true"
+							filterMatchMode="startsWith"
+							disabled="#{movimentacaoPrestadorBean.isDisable('AREACURSO')}"
+							required="#{movimentacaoPrestadorBean.isRequired('AREACURSO')}"
+							converter="#{vEntityConverter}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorCurriculo.areaCurso}">
+							<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems value="#{movimentacaoPrestadorBean.areaCursoList}"
+								var="e" itemLabel="#{e.descricao}" />
+						</p:selectOneMenu>
+						<p:message for="areaCurso" display="text" />
+					</h:panelGrid>
+
+					<!-- ENTIDADE DE ENSINO -->
+					<h:panelGrid style="text-align:left">
+						<p:outputLabel for="instituicaoCurso"
+							value="#{msg['movimentacaoPrestadorCurriculo.entidadeEnsino']}" />
+						<p:selectOneMenu id="instituicaoCurso" filter="true"
+							filterMatchMode="startsWith" converter="#{vEntityConverter}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('ENTIDADEENSINO')}"
+							required="#{movimentacaoPrestadorBean.isRequired('ENTIDADEENSINO')}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorCurriculo.entidadeEnsino}">
+							<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems
+								value="#{movimentacaoPrestadorBean.entidadeEnsinoList}" var="e"
+								itemLabel="#{e.descricao}" />
+						</p:selectOneMenu>
+						<p:message for="instituicaoCurso" display="text" />
+					</h:panelGrid>
+				</h:panelGrid>
+
+				<!-- NOME DO CURSO -->
+				<h:panelGrid style="width:85%">
+					<p:outputLabel for="nomeCurso"
+						value="#{msg['movimentacaoPrestadorCurriculo.curso']}" />
+					<p:inputText id="nomeCurso"
+						disabled="#{movimentacaoPrestadorBean.isDisable('CURSO')}"
+						required="#{movimentacaoPrestadorBean.isRequired('CURSO')}"
+						style="width:100%; min-width:20px" maxlength="50"
+						value="#{movimentacaoPrestadorBean.movimentacaoPrestadorCurriculo.curso}"
+						onblur="converteMaiuscula(this);">
+						<pe:keyFilter regEx="/[A-ZzÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]/i" />
+						<f:validateLength maximum="50" />
+					</p:inputText>
+					<p:message for="nomeCurso" display="text" />
+				</h:panelGrid>
+
+				<p:commandButton value="#{msg['btn.salvar']}" icon="fa fa-save"
+					actionListener="#{movimentacaoPrestadorBean.adicionaItemCurriculo()}"
+					oncomplete="handleProcedimentoDialog(xhr, status, args)"
+					update="tabelaCurriculos, @form" />
+				<p:commandButton value="#{msg['btn.fechar']}" icon="fa fa-close"
+					action="#{movimentacaoPrestadorBean.fecharModalCurriculo()}"
+					oncomplete="PF('itemCurriculoDialog').hide();">
+					<o:ignoreValidationFailed />
+				</p:commandButton>
+			</o:form>
+		</p:dialog>
+
+		<!-- DIALOG CADASTRO DE DEPENDENTE -->
+		<p:dialog id="itemDependenteDialog" widgetVar="itemDependenteDialog"
+			responsive="true" onHide="refreshTable();"
+			header="#{msg['movimentacaoPrestadorDependente.dialog.head']}"
+			closeOnEscape="false" modal="true" position="center">
+
+			<o:form id="formDialogCadastroDependente">
+				<p:panelGrid columns="2" layout="grid" id="gridDependente">
+
+					<!-- TIPO DEPENDENTE -->
+					<h:panelGrid style="text-align:left"
+						title="#{msg['movimentacaoPrestadorDependente.tipoDependente.msg']}">
+						<p:outputLabel for="tipoDependente"
+							value="#{msg['movimentacaoPrestadorDependente.tipoDependente']}" />
+						<p:selectOneMenu id="tipoDependente"
+							title="#{msg['movimentacaoPrestadorDependente.tipoDependente.msg']}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('TIPODEPENDENTEESOCIAL')}"
+							required="#{movimentacaoPrestadorBean.isRequired('TIPODEPENDENTEESOCIAL')}"
+							converter="#{vEntityConverter}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorDependente.tipoDependente}">
+							<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems
+								value="#{movimentacaoPrestadorBean.tipoDependenteList()}"
+								var="e" itemLabel="#{e.descricao}" />
+						</p:selectOneMenu>
+						<p:message for="tipoDependente" display="text" />
+					</h:panelGrid>
+
+					<!-- NOME DEPENDENTE -->
+					<h:panelGrid>
+						<p:outputLabel for="nomeDependente"
+							value="#{msg['movimentacaoPrestadorDependente.nome']}" />
+						<p:inputText id="nomeDependente"
+							disabled="#{movimentacaoPrestadorBean.isDisable('NOME')}"
+							required="#{movimentacaoPrestadorBean.isRequired('NOME')}"
+							style="width:100%" maxlength="70"
+							onblur="converteMaiuscula(this)" validator="nomeValidator"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorDependente.nome}">
+							<p:ajax partialSubmit="true" event="change" update="@parent" />
+						</p:inputText>
+						<pe:keyFilter regEx="/[A-ZzÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]/i"
+							for="nomeDependente" />
+						<p:message for="nomeDependente" display="text" />
+					</h:panelGrid>
+
+					<!-- DATA DE NASCIMENTO -->
+					<h:panelGrid style="white-space:nowrap;">
+						<p:outputLabel for="dataNascDependente"
+							value="#{msg['movimentacaoPrestadorDependente.dataNascimento']}" />
+						<p:calendar id="dataNascDependente" mindate="1/1/1900"
+							yearRange="-116:" maxdate="#{now}" style="width:12%"
+							showOn="button" mask="true" validator="dataFuturaValidator"
+							disabled="#{movimentacaoPrestadorBean.isDisable('DATANASCIMENTO')}"
+							required="#{movimentacaoPrestadorBean.isRequired('DATANASCIMENTO')}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorDependente.dataNascimento}"
+							navigator="true" pattern="dd/MM/yyyy">
+							<p:ajax event="dateSelect"
+								update="dataNascDependente, cpfDependente" />
+							<p:ajax event="change" update="dataNascDependente, cpfDependente" />
+						</p:calendar>
+						<p:message for="dataNascDependente" display="text" />
+					</h:panelGrid>
+
+					<!-- CPF -->
+					<h:panelGrid
+						title="#{msg['movimentacaoPrestadorDependente.cpf.msg']}">
+						<p:outputLabel for="cpfDependente"
+							value="#{msg['movimentacaoPrestadorDependente.cpf']}" />
+						<p:inputMask id="cpfDependente" converter="converterCPF"
+							disabled="#{movimentacaoPrestadorBean.isDisable('CPF')}"
+							required="#{movimentacaoPrestadorBean.maior and movimentacaoPrestadorBean.isRequired('CPF')}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorDependente.cpf}"
+							title="#{msg['movimentacaoPrestadorDependente.cpf.msg']}"
+							style="width:25%; min-width:110px" mask="999.999.999-99"
+							dir="LTR" maxlength="14"
+							validator="#{movimentacaoPrestadorBean.validarCpfDependente}">
+							<pe:keyFilter regEx="/[\d]/" />
+						</p:inputMask>
+						<p:message for="cpfDependente" display="text" />
+					</h:panelGrid>
+
+					<!-- DEPENDENTE IRRF -->
+					<h:panelGrid
+						title="#{msg['movimentacaoPrestadorDependente.irrf.msg']}">
+						<p:outputLabel for="dependenteIRRF"
+							title="#{msg['movimentacaoPrestadorDependente.irrf.msg']}"
+							value="#{msg['movimentacaoPrestadorDependente.irrf']}" />
+						<p:selectBooleanCheckbox id="dependenteIRRF"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorDependente.irrf}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('DEPENDENTEIRRF')}"
+							required="false" />
+					</h:panelGrid>
+
+					<!-- Tipo de Plano -->
+					<h:panelGrid>
+						<p:outputLabel
+							value="#{msg['movimentacaoPrestadorDependente.planoPrivadoSaude']}" />
+						<p:selectBooleanCheckbox id="dependentePlano"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorDependente.planoPrivadoSaude}"
+							disabled="#{movimentacaoPrestadorBean.isDisable('PLANOPRIVADOSAUDE')}"
+							required="false" />
+					</h:panelGrid>
+				</p:panelGrid>
+
+				<h:panelGrid columns="2" width="100%" style="margin-top:1%"
+					id="gridDependenteBotoes">
+					<p:commandButton value="#{msg['btn.salvar']}" icon="fa fa-save"
+						actionListener="#{movimentacaoPrestadorBean.adicionarDependente()}"
+						oncomplete="handleDialogCadDependente(xhr, status, args)"
+						update="tabelaDependentes, @form" />
+					<p:commandButton value="#{msg['btn.fechar']}" icon="fa fa-close"
+						action="#{movimentacaoPrestadorBean.fecharModalDependente()}"
+						oncomplete="PF('itemDependenteDialog').hide();">
+						<o:ignoreValidationFailed />
+					</p:commandButton>
+				</h:panelGrid>
+				<p:remoteCommand name="refreshTable">
+					<o:ignoreValidationFailed />
+				</p:remoteCommand>
+			</o:form>
+		</p:dialog>
+
+		<!-- DIALOG  EDICAO/CRIACAO DE ENDERECO ATENDIMENTO -->
+		<p:dialog id="itemEnderecoAtendimento" modal="true" appendTo="@(body)"
+			widgetVar="itemEnderecoAtendimento"
+			header="#{msg['movimentacaoPrestadorEnderecoAtendimento.dialog.head']}"
+			closeOnEscape="true" position="center">
+			<p:scrollPanel mode="native"
+				styleClass="redimencionarModalResponsivo">
+				<o:form id="formDialogEnderecoAtendimento">
+
+					<!-- foco no campo com erro -->
+					<p:focus id="focus"/>
+
+					<p:panelGrid columns="4" layout="grid" id="gridEnderecoAtendimento">
+
+						<!-- 								CEP -->
+						<h:panelGrid>
+							<p:outputLabel for="cepEnderecoAtendimento"
+								value="#{msg['movimentacaoPrestadorEndereco.cep']}" />
+							<h:panelGrid columns="2" width="5%">
+								<p:inputMask id="cepEnderecoAtendimento"
+									readonly="#{facesContext.renderResponse}"
+									disabled="#{movimentacaoPrestadorBean.isDisable('CEP')}"
+									required="#{movimentacaoPrestadorBean.isRequired('CEP')}"
+									title="#{msg['movimentacaoPrestadorEndereco.cep.msg']}"
+									value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.cep}"
+									style="width:43%; min-width:68px" mask="99999-999" dir="LTR">
+								</p:inputMask>
+								<p:commandButton immediate="true"
+									action="#{movimentacaoPrestadorBean.hasLogAuditoriaAtendimentoCep()}"
+									icon="fa fa-pencil">
+								</p:commandButton>
+							</h:panelGrid>
+							<p:message id="msgCepEnderecoAtendimento"
+								for="cepEnderecoAtendimento" display="text" />
+						</h:panelGrid>
+
+						<!-- 								CNES -->
+						<h:panelGrid id="idGridCnes">
+							<p:outputLabel for="cnesEnderecoAtendimento"
+								value="#{msg['movimentacaoPrestadorEndereco.cnes']}" />
+							<p:inputText id="cnesEnderecoAtendimento"
+								disabled="#{movimentacaoPrestadorBean.isDisable('CNES')}"
+								required="#{movimentacaoPrestadorBean.isRequired('CNES')}"
+								value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.cnes}"
+								style="width:43%;" maxlength="7"
+								validator="#{movimentacaoPrestadorBean.validarCnes}">
+								<f:validateLength minimum="1" maximum="7" />
+								<f:attribute name="enderecoParam"
+									value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento}" />
+								<p:ajax partialSubmit="true" event="change"
+									process="@this, idGridCnes" update="@this,idGridCnes" />
+							</p:inputText>
+							<pe:keyFilter regEx="/[0-9]/i" for="cnesEnderecoAtendimento" />
+							<p:message for="cnesEnderecoAtendimento" display="text" />
+						</h:panelGrid>
+
+						<!-- 								TIPO LOGRADOURO -->
+						<h:panelGrid style="text-align:left" rendered="true">
+							<p:outputLabel for="tipoLogradouroEnderecoAtendimento"
+								value="#{msg['movimentacaoPrestadorEndereco.tipoLogradouro']}" />
+							<p:selectOneMenu id="tipoLogradouroEnderecoAtendimento"
+								disabled="#{movimentacaoPrestadorBean.isDisable('TIPOLOGRADOURO')}"
+								required="#{movimentacaoPrestadorBean.isRequired('TIPOLOGRADOURO')}"
+								converter="#{vEntityConverter}"
+								value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.tipoLogradouro}">
+								<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+									noSelectionOption="true" />
+								<f:selectItems
+									value="#{movimentacaoPrestadorBean.tipoLogradouroList}" var="e"
+									itemLabel="#{e.descricao}" />
+								<p:ajax partialSubmit="true" event="change" update="@parent" />
+							</p:selectOneMenu>
+							<p:message for="tipoLogradouroEnderecoAtendimento" display="text" />
+						</h:panelGrid>
+
+						<!-- 								LOGRADOURO -->
+						<h:panelGrid style="width:100%">
+							<p:outputLabel for="logradouroEnderecoAtendimento"
+								value="#{msg['movimentacaoPrestadorEndereco.logradouro']}" />
+							<p:inputText id="logradouroEnderecoAtendimento"
+								disabled="#{movimentacaoPrestadorBean.isDisable('LOGRADOURO')}"
+								required="#{movimentacaoPrestadorBean.isRequired('LOGRADOURO')}"
+								style="width:100%" onblur="converteMaiuscula(this)"
+								readonly="#{facesContext.renderResponse}"
+								value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.logradouro}"
+								maxlength="80">
+								<pe:keyFilter regEx="/[A-Z0-9\.\_\-\s]/i" />
+								<f:validateLength minimum="1" maximum="80" />
+								<p:ajax partialSubmit="true" event="change" update="@parent" />
+							</p:inputText>
+							<p:message for="logradouroEnderecoAtendimento" display="text" />
+						</h:panelGrid>
+
+						<!-- 								NUMERO -->
+						<h:panelGrid>
+							<p:outputLabel for="numeroEnderecoAtendimento"
+								value="#{msg['movimentacaoPrestadorEndereco.numero']}" />
+							<p:inputText id="numeroEnderecoAtendimento"
+								disabled="#{movimentacaoPrestadorBean.isDisable('NUMERO')}"
+								required="#{movimentacaoPrestadorBean.isRequired('NUMERO')}"
+								value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.numero}"
+								style="width:43%;" maxlength="10">
+								<f:validateLength minimum="1" maximum="10" />
+								<pe:keyFilter regEx="/[0-9]/i" />
+							</p:inputText>
+							<p:message for="numeroEnderecoAtendimento" display="text" />
+						</h:panelGrid>
+
+						<!-- 								COMPLEMENTO -->
+						<h:panelGrid>
+							<p:outputLabel for="complementoEnderecoAtendimento"
+								value="#{msg['movimentacaoPrestadorEndereco.complemento']}" />
+							<p:inputText id="complementoEnderecoAtendimento"
+								disabled="#{movimentacaoPrestadorBean.isDisable('COMPLEMENTO')}"
+								required="#{movimentacaoPrestadorBean.isRequired('COMPLEMENTO')}"
+								maxlength="20"
+								title="#{msg['movimentacaoPrestadorEndereco.complemento.msg']}"
+								onblur="converteMaiuscula(this)"
+								value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.complemento}"
+								style="width:60%;">
+								<f:validateLength minimum="1" maximum="20" />
+							</p:inputText>
+							<p:message for="complementoEnderecoAtendimento" display="text" />
+						</h:panelGrid>
+
+						<!-- 								BAIRRO -->
+						<h:panelGrid>
+							<p:outputLabel for="bairroEnderecoAtendimento"
+								value="#{msg['movimentacaoPrestadorEndereco.bairro']}" />
+							<p:inputText id="bairroEnderecoAtendimento"
+								disabled="#{movimentacaoPrestadorBean.isDisable('BAIRRO')}"
+								required="#{movimentacaoPrestadorBean.isRequired('BAIRRO')}"
+								style="width:100%" maxlength="60"
+								onblur="converteMaiuscula(this)"
+								readonly="#{facesContext.renderResponse}"
+								value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.bairro}">
+								<p:ajax partialSubmit="true" event="change" update="@parent" />
+							</p:inputText>
+							<p:message for="bairroEnderecoAtendimento" display="text" />
+						</h:panelGrid>
+
+						<!-- 								MUNICIPIO RESIDENCIAL -->
+						<h:panelGrid id="gridMunicipioEnderecoAtendimento"
+							style="text-align: left">
+							<p:outputLabel for="municipioEnderecoAtendimento"
+								value="#{msg['movimentacaoPrestadorEndereco.municipio']}" />
+							<p:selectOneMenu id="municipioEnderecoAtendimento"
+								disabled="#{movimentacaoPrestadorBean.isDisable('MUNICIPIO')}"
+								required="#{movimentacaoPrestadorBean.isRequired('MUNICIPIO')}"
+								converter="#{vEntityConverter}"
+								value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.municipio}">
+								<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+									noSelectionOption="true" />
+								<f:selectItems
+									value="#{movimentacaoPrestadorBean.getMunicipiosEstado(movimentacaoPrestadorBean.editEntity.itemEnderecoAtendimento.estado)}"
+									var="e" itemLabel="#{e.nome}" />
+								<p:ajax partialSubmit="true" update="@parent" event="change" />
+							</p:selectOneMenu>
+							<p:message for="municipioEnderecoAtendimento" display="text" />
+						</h:panelGrid>
+
+						<!-- 						 		ESTADO RESIDENCIAL -->
+						<h:panelGrid id="gridEstadoEnderecoAtendimento"
+							style="text-align: left">
+							<p:outputLabel for="estadoEnderecoAtendimento"
+								value="#{msg['movimentacaoPrestadorEndereco.estado']}" />
+							<p:selectOneMenu id="estadoEnderecoAtendimento"
+								disabled="#{movimentacaoPrestadorBean.isDisable('ESTADO')}"
+								required="#{movimentacaoPrestadorBean.isRequired('ESTADO')}"
+								converter="#{vEntityConverter}"
+								value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.estado}">
+								<f:selectItem itemLabel="#{msg['selecione']}" itemValue=""
+									noSelectionOption="true" />
+								<f:selectItems value="#{movimentacaoPrestadorBean.estadosList}"
+									var="e" itemLabel="#{e.sigla}" />
+								<p:ajax
+									update=" gridMunicipioEnderecoAtendimento, gridEstadoEnderecoAtendimento, @this"
+									event="change" partialSubmit="true" />
+							</p:selectOneMenu>
+							<p:message for="estadoEnderecoAtendimento" display="text" />
+						</h:panelGrid>
+
+						<!-- 						        NUMERO ATENDIMENTO 1 -->
+						<h:panelGrid columns="1">
+							<p:outputLabel for="numeroAtendimento1"
+								value="#{msg['movimentacaoPrestadorEndereco.numero1']}" />
+							<h:panelGrid columns="3"
+								columnClasses="alinhaDdd1, alinhaPrefixo1">
+								<h:column>
+									<p:inputText id="dddAtendimento1"
+										disabled="#{movimentacaoPrestadorBean.isDisable('DDD1')}"
+										required="#{movimentacaoPrestadorBean.isRequired('DDD1')}"
+										title="#{msg['movimentacaoPrestadorEndereco.ddd1.msg']}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.ddd1}"
+										maxlength="2" style="width:60%; min-width:60%">
+										<f:validateLongRange minimum="11" maximum="99" />
+										<f:validateLength minimum="2" maximum="2" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+								<h:column>
+									<p:inputText id="prefixoAtendimento1"
+										disabled="#{movimentacaoPrestadorBean.isDisable('PREFIXO1')}"
+										required="#{movimentacaoPrestadorBean.isRequired('PREFIXO1')}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.prefixo1}"
+										maxlength="5" style="width:75%; min-width:65%">
+										<f:validateLength minimum="4" maximum="5" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+								<h:column>
+									<p:inputText id="numeroAtendimento1"
+										disabled="#{movimentacaoPrestadorBean.isDisable('NUMERO1')}"
+										required="#{movimentacaoPrestadorBean.isRequired('NUMERO1')}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.numero1}"
+										maxlength="4"
+										style="width:20%; min-width:35px !important;
+											max-width:45px !important;">
+										<f:validateLength minimum="4" maximum="4" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+							</h:panelGrid>
+							<p:message for="dddAtendimento1" display="text" />
+							<p:message for="prefixoAtendimento1" display="text" />
+							<p:message for="numeroAtendimento1" display="text" />
+						</h:panelGrid>
+
+						<!-- 								RAMAL 1 -->
+						<h:panelGrid columns="1">
+							<h:panelGrid columns="1">
+								<p:outputLabel for="ramalAtendimento1"
+									value="#{msg['movimentacaoPrestadorEndereco.ramal1']}" />
+								<h:column>
+									<p:inputText id="ramalAtendimento1"
+										disabled="#{movimentacaoPrestadorBean.isDisable('RAMAL1')}"
+										required="#{movimentacaoPrestadorBean.isRequired('RAMAL1')}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.ramal1}"
+										maxlength="4"
+										style="width:20%; min-width:45px !important;
+											max-width:55px !important;">
+										<f:validateLength minimum="4" maximum="4" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+							</h:panelGrid>
+							<p:message for="ramalAtendimento1" display="text" />
+						</h:panelGrid>
+
+						<!-- 						        NUMERO ATENDIMENTO 2 -->
+						<h:panelGrid columns="1">
+							<p:outputLabel for="numeroAtendimento2"
+								value="#{msg['movimentacaoPrestadorEndereco.numero2']}" />
+							<o:validateMultiple id="numero2Validator"
+								components="dddAtendimento2 prefixoAtendimento2 numeroAtendimento2"
+								validator="#{numero2Validator}" />
+							<h:panelGrid columns="3"
+								columnClasses="alinhaDdd1, alinhaPrefixo1">
+								<h:column>
+									<p:inputText id="dddAtendimento2"
+										disabled="#{movimentacaoPrestadorBean.isDisable('DDD2')}"
+										required="#{movimentacaoPrestadorBean.isRequired('DDD2')}"
+										title="#{msg['movimentacaoPrestadorEndereco.ddd2.msg']}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.ddd2}"
+										maxlength="2" style="width:60%; min-width:60%">
+										<f:validateLongRange minimum="11" maximum="99" />
+										<f:validateLength minimum="2" maximum="2" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+								<h:column>
+									<p:inputText id="prefixoAtendimento2"
+										disabled="#{movimentacaoPrestadorBean.isDisable('PREFIXO2')}"
+										required="#{movimentacaoPrestadorBean.isRequired('PREFIXO2')}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.prefixo2}"
+										maxlength="5" style="width:75%; min-width:65%">
+										<f:validateLength minimum="4" maximum="5" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+								<h:column>
+									<p:inputText id="numeroAtendimento2"
+										disabled="#{movimentacaoPrestadorBean.isDisable('NUMERO2')}"
+										required="#{movimentacaoPrestadorBean.isRequired('NUMERO2')}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.numero2}"
+										maxlength="4"
+										style="width:20%; min-width:35px !important;
+											max-width:45px !important;">
+										<f:validateLength minimum="4" maximum="4" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+							</h:panelGrid>
+							<p:message for="dddAtendimento2" display="text" />
+							<p:message for="prefixoAtendimento2" display="text" />
+							<p:message for="numeroAtendimento2" display="text" />
+						</h:panelGrid>
+
+						<!-- 								RAMAL 2 -->
+						<h:panelGrid columns="1">
+							<h:panelGrid columns="1">
+								<p:outputLabel for="ramalAtendimento2"
+									value="#{msg['movimentacaoPrestadorEndereco.ramal2']}" />
+								<h:column>
+									<p:inputText id="ramalAtendimento2"
+										disabled="#{movimentacaoPrestadorBean.isDisable('RAMAL2')}"
+										required="#{movimentacaoPrestadorBean.isRequired('RAMAL2')}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.ramal2}"
+										maxlength="4"
+										style="width:20%; min-width:45px !important;
+											max-width:55px !important;">
+										<f:validateLength minimum="4" maximum="4" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+							</h:panelGrid>
+							<p:message for="ramalAtendimento2" display="text" />
+						</h:panelGrid>
+
+						<!-- 						        NUMERO ATENDIMENTO 3 -->
+						<h:panelGrid columns="1">
+							<p:outputLabel for="numeroAtendimento3"
+								value="#{msg['movimentacaoPrestadorEndereco.numero3']}" />
+							<o:validateMultiple id="numero3Validator"
+								components="dddAtendimento3 prefixoAtendimento3 numeroAtendimento3"
+								validator="#{numero3Validator}" />
+							<h:panelGrid columns="3"
+								columnClasses="alinhaDdd1, alinhaPrefixo1">
+								<h:column>
+									<p:inputText id="dddAtendimento3"
+										disabled="#{movimentacaoPrestadorBean.isDisable('DDD3')}"
+										required="#{movimentacaoPrestadorBean.isRequired('DDD3')}"
+										title="#{msg['movimentacaoPrestadorEndereco.ddd3.msg']}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.ddd3}"
+										maxlength="2" style="width:60%; min-width:60%">
+										<f:validateLongRange minimum="11" maximum="99" />
+										<f:validateLength minimum="2" maximum="2" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+								<h:column>
+									<p:inputText id="prefixoAtendimento3"
+										disabled="#{movimentacaoPrestadorBean.isDisable('PREFIXO3')}"
+										required="#{movimentacaoPrestadorBean.isRequired('PREFIXO3')}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.prefixo3}"
+										maxlength="5" style="width:75%; min-width:65%">
+										<f:validateLength minimum="4" maximum="5" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+								<h:column>
+									<p:inputText id="numeroAtendimento3"
+										disabled="#{movimentacaoPrestadorBean.isDisable('NUMERO3')}"
+										required="#{movimentacaoPrestadorBean.isRequired('NUMERO3')}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.numero3}"
+										maxlength="4"
+										style="width:20%; min-width:35px !important;
+											max-width:45px !important;">
+										<f:validateLength minimum="4" maximum="4" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+							</h:panelGrid>
+							<p:message for="dddAtendimento3" display="text" />
+							<p:message for="prefixoAtendimento3" display="text" />
+							<p:message for="numeroAtendimento3" display="text" />
+						</h:panelGrid>
+
+						<!-- 								RAMAL 3 -->
+						<h:panelGrid columns="1">
+							<h:panelGrid columns="1">
+								<p:outputLabel for="ramalAtendimento3"
+									value="#{msg['movimentacaoPrestadorEndereco.ramal3']}" />
+								<h:column>
+									<p:inputText id="ramalAtendimento3"
+										disabled="#{movimentacaoPrestadorBean.isDisable('RAMAL3')}"
+										required="#{movimentacaoPrestadorBean.isRequired('RAMAL3')}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.ramal3}"
+										maxlength="4"
+										style="width:20%; min-width:45px !important;
+											max-width:55px !important;">
+										<f:validateLength minimum="4" maximum="4" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+							</h:panelGrid>
+							<p:message for="ramalAtendimento3" display="text" />
+						</h:panelGrid>
+
+						<!-- 						        NUMERO FAX ATENDIMENTO -->
+						<h:panelGrid columns="1">
+							<p:outputLabel for="numeroAtendimentoFax"
+								value="#{msg['movimentacaoPrestadorEndereco.numeroFax']}" />
+							<o:validateMultiple id="numeroFaxValidator"
+								components="dddAtendimentoFax prefixoAtendimentoFax numeroAtendimentoFax"
+								validator="#{numeroFaxValidator}" />
+							<h:panelGrid columns="3"
+								columnClasses="alinhaDdd1, alinhaPrefixo1">
+								<h:column>
+									<p:inputText id="dddAtendimentoFax"
+										disabled="#{movimentacaoPrestadorBean.isDisable('DDDFAX')}"
+										required="#{movimentacaoPrestadorBean.isRequired('DDDFAX')}"
+										title="#{msg['movimentacaoPrestadorEndereco.dddFax.msg']}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.dddFax}"
+										maxlength="2" style="width:60%; min-width:60%">
+										<f:validateLongRange minimum="11" maximum="99" />
+										<f:validateLength minimum="2" maximum="2" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+								<h:column>
+									<p:inputText id="prefixoAtendimentoFax"
+										disabled="#{movimentacaoPrestadorBean.isDisable('PREFIXOFAX')}"
+										required="#{movimentacaoPrestadorBean.isRequired('PREFIXOFAX')}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.prefixoFax}"
+										maxlength="5" style="width:75%; min-width:65%">
+										<f:validateLength minimum="4" maximum="5" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+								<h:column>
+									<p:inputText id="numeroAtendimentoFax"
+										disabled="#{movimentacaoPrestadorBean.isDisable('NUMEROFAX')}"
+										required="#{movimentacaoPrestadorBean.isRequired('NUMEROFAX')}"
+										value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.numeroFax}"
+										maxlength="4"
+										style="width:20%; min-width:35px !important;
+											max-width:45px !important;">
+										<f:validateLength minimum="4" maximum="4" />
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+								</h:column>
+							</h:panelGrid>
+							<p:message for="dddAtendimentoFax" display="text" />
+							<p:message for="prefixoAtendimentoFax" display="text" />
+							<p:message for="numeroAtendimentoFax" display="text" />
+						</h:panelGrid>
+
+						<h:panelGrid>
+						</h:panelGrid>
+
+						<h:panelGrid columns="2">
+							<p:selectBooleanCheckbox id="enderecoAtendimentoCorrespondencia"
+								disabled="#{movimentacaoPrestadorBean.isDisable('CORRESPONDENCIA') or movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.correspondencia eq true ? true:false}"
+								value="#{movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.correspondencia}">
+								<p:ajax update="@this"
+									listener="#{movimentacaoPrestadorBean.verificarEnderecoDeCorrespondencia()}" />
+							</p:selectBooleanCheckbox>
+							<p:outputLabel for="enderecoAtendimentoCorrespondencia"
+								value="#{msg['movimentacaoPrestadorEnderecoAtendimento.endereco.correspondencia']}" />
+						</h:panelGrid>
+
+					</p:panelGrid>
+
+					<!-- GRID COM A AGENDA DE ATENDIMENTO -->
+					<h:panelGrid columns="1" width="100%" style="margin-top:1%"
+						id="gridEnderecoAtendimentoFildSet">
+						<p:fieldset
+							legend="#{msg['movimentacaoPrestadorEnderecoAtendimento.horario.atendimento']}">
+							<p:dataTable rows="5" id="tabelaDadosAtendimentoHorario"
+								style="margin-top:1%"
+								emptyMessage="#{msg['informativo.endereco.atendimento.horario.vazio']}"
+								reflow="true"
+								value="#{movimentacaoPrestadorBean.movimentacaoPrestadorHorarioList}"
+								paginator="true" paginatorPosition="bottom" var="_horario">
+
+								<p:column
+									headerText="#{msg['movimentacaoPrestadorHorario.domingo']}"
+									width="6%">
+									<p:selectBooleanCheckbox id="horarioDomingo" disabled="true"
+										value="#{_horario.domingo}" />
+								</p:column>
+
+								<p:column
+									headerText="#{msg['movimentacaoPrestadorHorario.segunda']}"
+									width="6%">
+									<p:selectBooleanCheckbox id="horarioSegunda" disabled="true"
+										value="#{_horario.segunda}" />
+								</p:column>
+
+								<p:column
+									headerText="#{msg['movimentacaoPrestadorHorario.terca']}"
+									width="6%">
+									<p:selectBooleanCheckbox id="horarioTerca" disabled="true"
+										value="#{_horario.terca}" />
+								</p:column>
+
+								<p:column
+									headerText="#{msg['movimentacaoPrestadorHorario.quarta']}"
+									width="6%">
+									<p:selectBooleanCheckbox id="horarioQuarta" disabled="true"
+										value="#{_horario.quarta}" />
+								</p:column>
+
+								<p:column
+									headerText="#{msg['movimentacaoPrestadorHorario.quinta']}"
+									width="6%">
+									<p:selectBooleanCheckbox id="horarioQuinta" disabled="true"
+										value="#{_horario.quinta}" />
+								</p:column>
+
+								<p:column
+									headerText="#{msg['movimentacaoPrestadorHorario.sexta']}"
+									width="6%">
+									<p:selectBooleanCheckbox id="horarioSexta" disabled="true"
+										value="#{_horario.sexta}" />
+								</p:column>
+
+								<p:column
+									headerText="#{msg['movimentacaoPrestadorHorario.sabado']}"
+									width="6%">
+									<p:selectBooleanCheckbox id="horarioSabado" disabled="true"
+										value="#{_horario.sabado}" />
+								</p:column>
+
+								<p:column
+									headerText="#{msg['movimentacaoPrestadorHorario.horaInicial']}"
+									width="7%">
+									<h:outputText id="horarioInicial"
+										value="#{_horario.horaInicial}">
+										<f:convertDateTime pattern="HH:mm" />
+									</h:outputText>
+								</p:column>
+
+								<p:column
+									headerText="#{msg['movimentacaoPrestadorHorario.horaFinal']}"
+									width="7%">
+									<h:outputText id="horarioFinal" value="#{_horario.horaFinal}">
+										<f:convertDateTime pattern="HH:mm" />
+									</h:outputText>
+								</p:column>
+
+								<!-- AÇÕES -->
+								<p:column headerText="#{msg['label.acao']}" width="10%"
+									style="text-align:center">
+
+									<!-- EDITAR HORARIO DE ATENDIMENTO -->
+									<p:commandButton icon="fa fa-fw fa-edit" immediate="true"
+										style="width:28px"
+										rendered="#{not empty movimentacaoPrestadorBean.movimentacaoPrestadorEnderecoAtendimento.prestadorHorarios}"
+										action="#{movimentacaoPrestadorBean.editarHorarioAtendimento()}"
+										update="tabelaDadosAtendimentoHorario, :formDialogHorarioAtendimento"
+										oncomplete="PF('itemHorarioAtendimento').show();">
+
+										<f:setPropertyActionListener
+											target="#{movimentacaoPrestadorBean.editEntity.itemEnderecoAtendimento.itemMovimentacaoPrestadorHorario}"
+											value="#{_horario}" />
+									</p:commandButton>
+
+									<!-- EXCLUIR HORARIO DE ATENDIMENTO -->
+									<p:commandButton icon="fa fa-trash"
+										style="margin-left:6%; width:28px" immediate="true"
+										action="#{movimentacaoPrestadorBean.excluirItemHorarioAtendimento()}"
+										update="tabelaDadosAtendimentoHorario">
+										<p:confirm
+											header="#{msg['informativo.endereco.atendimento.horario.exclui.head']}"
+											message="#{msg['informativo.endereco.atendimento.horario.exclui.message']}"
+											icon="fa fa-warning" />
+
+										<f:setPropertyActionListener
+											target="#{movimentacaoPrestadorBean.editEntity.itemEnderecoAtendimento.itemMovimentacaoPrestadorHorario}"
+											value="#{_horario}" />
+									</p:commandButton>
+
+									<p:confirmDialog global="true" showEffect="fade"
+										hideEffect="fade">
+										<p:commandButton value="#{msg['btn.dialog.yes']}"
+											styleClass="ui-confirmdialog-yes" icon="fa fa-check" />
+										<p:commandButton value="#{msg['btn.dialog.no']}"
+											styleClass="ui-confirmdialog-no" icon="fa fa-close" />
+									</p:confirmDialog>
+
+								</p:column>
+
+								<f:facet name="footer">
+									<h:panelGrid id="gridFooterAtendimento" styleClass="semBorda"
+										style="text-align:left">
+										<p:commandButton icon="fa fa-plus"
+											actionListener="#{movimentacaoPrestadorBean.novoHorarioAtendimento()}"
+											update="formDialogHorarioAtendimento, textoGenericoDialog"
+											immediate="true">
+											<o:ignoreValidationFailed />
+										</p:commandButton>
+									</h:panelGrid>
+								</f:facet>
+
+							</p:dataTable>
+						</p:fieldset>
+					</h:panelGrid>
+
+					<h:panelGrid columns="2" width="100%" style="margin-top:1%"
+						id="gridEnderecoAtendimentoBotoes">
+						<p:commandButton value="#{msg['btn.salvar']}" icon="fa fa-save"
+							actionListener="#{movimentacaoPrestadorBean.adicionarEnderecoAtendimento()}"
+							oncomplete="handleEnderecoAtendimentoDialog(xhr, status, args)"
+							update="tabelaDadosAtendimento, @form, focus" />
+
+						<p:commandButton value="#{msg['btn.fechar']}" icon="fa fa-close"
+							action="#{movimentacaoPrestadorBean.fecharModalEnderecoAtendimento()}"
+							oncomplete="PF('itemEnderecoAtendimento').hide();">
+							<o:ignoreValidationFailed />
+						</p:commandButton>
+					</h:panelGrid>
+				</o:form>
+			</p:scrollPanel>
+		</p:dialog>
+
+		<!-- 				DIALOG  EDICAO/CRIACAO DO HORARIO ATENDIMENTO -->
+		<p:dialog id="itemHorarioAtendimento" modal="true" appendTo="@(body)"
+			widgetVar="itemHorarioAtendimento" responsive="true"
+			header="#{msg['movimentacaoPrestadorEnderecoAtendimento.dialog.head']}"
+			closeOnEscape="true" position="center">
+			<o:form id="formDialogHorarioAtendimento">
+				<p:panelGrid columns="2" layout="grid" id="gridHorarioAtendimento">
+
+					<h:panelGrid columns="2"
+						rendered="#{movimentacaoPrestadorBean.renderizarCheckBoxDomingo}">
+						<p:selectBooleanCheckbox id="horarioAtendimentoDomingo"
+							disabled="#{movimentacaoPrestadorBean.desabilitarDiaHorarioAtendimento}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorHorario.domingo}" />
+						<p:outputLabel for="horarioAtendimentoDomingo"
+							value="#{msg['movimentacaoPrestadorHorario.domingo']}" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="2"
+						rendered="#{movimentacaoPrestadorBean.renderizarCheckBoxSegunda}">
+						<p:selectBooleanCheckbox id="horarioAtendimentoSegunda"
+							disabled="#{movimentacaoPrestadorBean.desabilitarDiaHorarioAtendimento}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorHorario.segunda}" />
+						<p:outputLabel for="horarioAtendimentoSegunda"
+							value="#{msg['movimentacaoPrestadorHorario.segunda']}" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="2"
+						rendered="#{movimentacaoPrestadorBean.renderizarCheckBoxTerca}">
+						<p:selectBooleanCheckbox id="horarioAtendimentoTerca"
+							disabled="#{movimentacaoPrestadorBean.desabilitarDiaHorarioAtendimento}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorHorario.terca}" />
+						<p:outputLabel for="horarioAtendimentoTerca"
+							value="#{msg['movimentacaoPrestadorHorario.terca']}" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="2"
+						rendered="#{movimentacaoPrestadorBean.renderizarCheckBoxQuarta}">
+						<p:selectBooleanCheckbox id="horarioAtendimentoQuarta"
+							disabled="#{movimentacaoPrestadorBean.desabilitarDiaHorarioAtendimento}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorHorario.quarta}" />
+						<p:outputLabel for="horarioAtendimentoQuarta"
+							value="#{msg['movimentacaoPrestadorHorario.quarta']}" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="2"
+						rendered="#{movimentacaoPrestadorBean.renderizarCheckBoxQuinta}">
+						<p:selectBooleanCheckbox id="horarioAtendimentoQuinta"
+							disabled="#{movimentacaoPrestadorBean.desabilitarDiaHorarioAtendimento}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorHorario.quinta}" />
+						<p:outputLabel for="horarioAtendimentoQuinta"
+							value="#{msg['movimentacaoPrestadorHorario.quinta']}" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="2"
+						rendered="#{movimentacaoPrestadorBean.renderizarCheckBoxSexta}">
+						<p:selectBooleanCheckbox id="horarioAtendimentoSexta"
+							disabled="#{movimentacaoPrestadorBean.desabilitarDiaHorarioAtendimento}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorHorario.sexta}" />
+						<p:outputLabel for="horarioAtendimentoSexta"
+							value="#{msg['movimentacaoPrestadorHorario.sexta']}" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="2"
+						rendered="#{movimentacaoPrestadorBean.renderizarCheckBoxSabado}">
+						<p:selectBooleanCheckbox id="horarioAtendimentoSabado"
+							disabled="#{movimentacaoPrestadorBean.desabilitarDiaHorarioAtendimento}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorHorario.sabado}" />
+						<p:outputLabel for="horarioAtendimentoSabado"
+							value="#{msg['movimentacaoPrestadorHorario.sabado']}" />
+					</h:panelGrid>
+
+					<h:panelGrid />
+
+				</p:panelGrid>
+
+				<o:validateMultiple id="horaInicialFinalValidator"
+					components="horarioInicialCal horarioFinalCal"
+					validator="#{horaInicialFinalValidator}" />
+
+				<p:panelGrid columns="2" width="100%" style="margin-top:1%"
+					id="gridHorarioAtendimentoHorario" layout="grid">
+					<h:panelGrid columns="1">
+						<p:outputLabel for="horarioInicialCal"
+							value="#{msg['movimentacaoPrestadorHorario.horaInicial']}" />
+						<p:calendar id="horarioInicialCal" pattern="HH:mm" timeOnly="true"
+							mask="true" showOn="button"
+							required="#{movimentacaoPrestadorBean.isRequiredHorario('HORAINICIAL')}"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorHorario.horaInicial}">
+						</p:calendar>
+						<p:message id="msgHorarioInicialCal" for="horarioInicialCal"
+							display="text" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="1">
+						<p:outputLabel for="horarioFinalCal"
+							value="#{msg['movimentacaoPrestadorHorario.horaFinal']}" />
+						<p:calendar id="horarioFinalCal" pattern="HH:mm" timeOnly="true"
+							required="#{movimentacaoPrestadorBean.isRequiredHorario('HORAFINAL')}"
+							mask="true" showOn="button"
+							value="#{movimentacaoPrestadorBean.movimentacaoPrestadorHorario.horaFinal}">
+						</p:calendar>
+						<p:message id="msgHorarioFinalCal" for="horarioFinalCal"
+							display="text" />
+					</h:panelGrid>
+				</p:panelGrid>
+
+				<h:panelGrid columns="2" width="100%" style="margin-top:1%"
+					id="gridHorarioAtendimentoBotoes">
+					<p:commandButton value="#{msg['btn.salvar']}" icon="fa fa-save"
+						actionListener="#{movimentacaoPrestadorBean.adicionarHorarioAtendimento()}"
+						oncomplete="handleHorarioAtendimentoDialog(xhr, status, args)"
+						update=":formDialogEnderecoAtendimento:tabelaDadosAtendimentoHorario, @form" />
+
+					<p:commandButton value="#{msg['btn.fechar']}" icon="fa fa-close"
+						action="#{movimentacaoPrestadorBean.fecharModalHorarioAtendimento()}"
+						oncomplete="PF('itemHorarioAtendimento').hide();">
+						<o:ignoreValidationFailed />
+					</p:commandButton>
+				</h:panelGrid>
+
+			</o:form>
+		</p:dialog>
+
+		<!-- 		DIALOG CONCLUSAO DE CADASTRO -->
+		<p:dialog id="concluirCadastro" modal="true" appendTo="@(body)"
+			widgetVar="concluirCadastro" responsive="true"
+			header="#{msg['informativo.conclusaoCadastro']}" resizable="false"
+			closable="false" position="center">
+			<h:form id="formDialogConclusao">
+				<p:panelGrid layout="grid" columns="1">
+					<h:outputText value="#{msg['informativo.concluido.sucesso']}" />
+				</p:panelGrid>
+				<p:commandButton value="#{msg['btn.ok']}"
+					update="@form, :prestador:remote, :prestador:textoUltimaMovimentacao, textoIntrodutorioDialog"
+					action="#{movimentacaoPrestadorBean.cadastroConcluido()}"
+					style="margin-top:4%" oncomplete="PF('concluirCadastro').hide();" />
+			</h:form>
+		</p:dialog>
+
+		<!-- 		DIALOG INFORMANDO EXISTENCIA DE ENDERECO DE CORRESPONDENCIA -->
+		<p:dialog id="enderecoCorrespondencia" modal="true"
+			widgetVar="enderecoCorrespondencia" responsive="true"
+			appendTo="@(body)" resizable="false" closable="false"
+			position="center">
+
+			<h:panelGrid columns="1" width="100%" style="margin-top:1%">
+				<h:outputText
+					value="#{msg['informativo.endereco.correspondencia.existente']}"
+					escape="false" />
+			</h:panelGrid>
+
+			<h:panelGrid columns="2" width="100%" style="margin-top:1%">
+				<p:commandButton value="#{msg['btn.dialog.yes']}"
+					actionListener="#{movimentacaoPrestadorBean.alterarEnderecoAtendimentoCorrespondencia()}"
+					oncomplete="handleEnderecoCorrespondenciaoDialog(xhr, status, args)"
+					icon="fa fa-save" />
+
+				<p:commandButton value="#{msg['btn.dialog.no']}"
+					actionListener="#{movimentacaoPrestadorBean.naoAlterarEnderecoAtendimentoCorrespondencia()}"
+					oncomplete="PF('enderecoCorrespondencia').hide();"
+					update="formDialogEnderecoAtendimento" icon="fa fa-close" />
+			</h:panelGrid>
+		</p:dialog>
+
+		<script>
+			function handleProcedimentoDialog(xhr, status, args) {
+				if (!args.validationFailed) {
+					PF('itemCurriculoDialog').hide();
+				}
+			}
+
+			function handleDialogCadDependente(xhr, status, args) {
+				if (!args.validationFailed) {
+					PF('itemDependenteDialog').hide();
+				}
+			}
+
+			function handleEnderecoAtendimentoDialog(xhr, status, args) {
+				if (!args.validationFailed) {
+					PF('itemEnderecoAtendimento').hide();
+				}
+			}
+
+			function handleHorarioAtendimentoDialog(xhr, status, args) {
+				if (!args.validationFailed) {
+					PF('itemHorarioAtendimento').hide();
+				}
+			}
+
+			function handleEnderecoCorrespondenciaoDialog(xhr, status, args) {
+				if (!args.validationFailed) {
+					PF('enderecoCorrespondencia').hide();
+				}
+			}
+
+			function converteMaiuscula(campo) {
+				var str = campo.value;
+				if (str.indexOf("*") != -1 || str.indexOf(",") != -1) {
+					str = str.substring(0, (str.length - 1));
+				}
+				campo.value = str.toUpperCase();
+			}
+		</script>
+
+		<br />
+	</ui:define>
+</ui:composition>

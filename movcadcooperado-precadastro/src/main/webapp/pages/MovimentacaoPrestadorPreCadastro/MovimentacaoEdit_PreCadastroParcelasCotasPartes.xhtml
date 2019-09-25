@@ -1,0 +1,81 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<!-- TAB DE DADOS PESSOAIS -->
+	<p:tab id="dadosCotasPartes"
+		title="#{msg['movimentacao.prestador.cotasPartes']}">
+		<p:panel header="#{msg['movimentacao.prestador.cotasPartes']}">
+
+			<p:panelGrid columns="3" layout="grid">
+
+				<!-- VALOR COTAS PARTES -->
+				<h:panelGrid>
+					<p:outputLabel for="valorCotas"
+						value="#{msg['movimentacaoPrestador.preCadastro.valorCotasPartes']}" />
+					<h:outputText id="valorCotas"
+						value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorCotasPartesPreCadastro.movimentacaoPrestadorCotasPartesParametros.valorCotasPartes}">
+						<f:convertNumber currencyCode="BRL" type="currency" />
+					</h:outputText>
+				</h:panelGrid>
+
+				<!-- FORMA DE PAGAMENTO -->
+				<h:panelGrid columns="1">
+					<h:outputLabel for="formaDePagamento" style="font-size: 14px;"
+						value="#{msg['movimentacaoPrestador.preCadastro.formaDePagamento']}" />
+					<p:selectOneRadio id="formaDePagamento" required="true" layout="grid" columns="1"
+						value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorCotasPartesPreCadastro.pagamentoAVista}">
+						<f:selectItem
+							itemLabel="#{msg['movimentacaoPrestador.preCadastro.pagamentoAVista']}"
+							itemValue="true" />
+						<f:selectItem
+							itemLabel="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorCotasPartesPreCadastro.movimentacaoPrestadorCotasPartesParametros.parcelasCotasPartes} #{msg['movimentacaoPrestador.preCadastro.parcelas']}"
+							itemValue="false" />
+						<p:ajax event="change" process="@this"
+							update="@this, formaDePagamentoMessage, gridValorParcela"
+							partialSubmit="true" oncomplete="gridValorParcela"
+							global="false"
+							listener="#{movimentacaoPrestadorPreCadastroBean.calcularValorParcelasCotasPartes()}" />
+					</p:selectOneRadio>
+					<p:message id="formaDePagamentoMessage" for="formaDePagamento"
+						display="text" />
+				</h:panelGrid>
+
+
+				<!-- 					Removendo UCWBACCF3-16 -->
+				<!-- QUANTIDADE DE PARCELAS ESCOLHIDAS -->
+				<!-- 				<h:panelGrid> -->
+				<!-- 					<p:outputLabel for="quantidadeParcelasEscolhidas" -->
+				<!-- 						value="#{msg['movimentacaoPrestador.preCadastro.quantidadeParcelasEscolhidas']}" /> -->
+				<!-- 					<p:inputText id="quantidadeParcelasEscolhidas" -->
+				<!-- 						value="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorCotasPartesPreCadastro.parcelasPagamento}"> -->
+				<!-- 						<p:ajax partialSubmit="true" global="false" update="valorParcela" -->
+				<!-- 							event="keyup" -->
+				<!-- 							listener="#{movimentacaoPrestadorPreCadastroBean.calcularValorParcelasCotasPartes()}" /> -->
+				<!-- 						<f:validateLength minimum="0" -->
+				<!-- 							maximum="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorCotasPartesPreCadastro.movimentacaoPrestadorCotasPartesParametros.parcelasCotasPartes}" /> -->
+				<!-- 						<pe:keyFilter regEx="/[0-9]/i" /> -->
+				<!-- 					</p:inputText> -->
+				<!-- 				</h:panelGrid> -->
+
+				<!-- INFORMANDO VALOR DE CADAS PARCELA -->
+				<h:panelGrid id="gridValorParcela">
+					<p:outputLabel id="valorParcelaLabel" for="valorParcela"
+						rendered="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorCotasPartesPreCadastro.pagamentoAVista eq 'TRUE'? false : true}"
+						value="#{msg['movimentacaoPrestador.preCadastro.valorPorParcelas']}" />
+					<h:outputText id="valorParcela"
+						rendered="#{movimentacaoPrestadorPreCadastroBean.editEntity.movimentacaoPrestadorCotasPartesPreCadastro.pagamentoAVista eq 'TRUE'? false : true}"
+						value="#{movimentacaoPrestadorPreCadastroBean.valorPorParcela}">
+						<f:convertNumber currencyCode="BRL" type="currency" />
+					</h:outputText>
+				</h:panelGrid>
+
+			</p:panelGrid>
+		</p:panel>
+	</p:tab>
+</ui:composition>

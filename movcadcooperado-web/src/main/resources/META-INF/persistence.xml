@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+	<persistence-unit name="UnibenPersistenceUnit"
+		transaction-type="JTA">
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<jta-data-source>java:jboss/datasources/movcad-ds</jta-data-source>
+
+		<!-- Mapeamento das classes da aplicação -->
+
+		<!-- Mapeamento das classes referentes ao Benner -->
+		<class>br.com.unimedcuritiba.benner.vo.AreaCursoVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.ConselhoVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.EntidadeEnsinoVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.EstadoCivilVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.EstadosVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.LogradouroVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.MunicipiosVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.PaisesVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.PrestadorCurriculoVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.PrestadorDependenteVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.PrestadorEnderecoVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.PrestadorHorarioVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.PrestadorVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.TipoLogradouroVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.TipoPrestadorVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.ZTabelaVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.ZCampoVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.BancoVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.AgenciaVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.ContaFinVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.TipoDependenteVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.CategoriaVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.TipoCategoriaVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.TipoDocumentoFinanceiroVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.TipoISSVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.EspecialidadeVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.GrupoEspecialidadeVO</class>
+		<class>br.com.unimedcuritiba.benner.vo.PrestadorEspecialidadeVO</class>
+
+		<!-- Mapeamento das classes referentes a Movimentacao Prestador -->
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.LogAuditoria</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestador</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorEndereco</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorCurriculo</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorHorario</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorDependente</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorCampo</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorAnexo</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorFinanceiro</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorEnderecoPreCadastro</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorPreCadastro</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorFinanceiroPreCadastro</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorAnexoPreCadastro</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorEspecialidade</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorCotasPartesPreCadastro</class>
+		<class>br.com.unimedcuritiba.movcad.cooperado.entity.MovimentacaoPrestadorCotasPartesParametros</class>
+
+		<properties>
+			<property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect" />
+			<!-- <property name="hibernate.enable_lazy_load_no_trans" value="true"/> -->
+			<!-- <property name="hibernate.event.merge.entity_copy_observer" value="allow"/> -->
+			<property name="hibernate.show_sql" value="true" />
+			<!-- <property name="hibernate.hbm2ddl.auto" value="update" /> -->
+		</properties>
+	</persistence-unit>
+</persistence>

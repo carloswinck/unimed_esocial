@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	template="/templates/template.xhtml" xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<ui:define name="body">
+
+		<o:form id="precadcooperado" prependId="false">
+
+			<h3>
+				<h:outputText value="#{msg['main.app.description']}" />
+			</h3>
+			<h6>
+				<h:outputText value="#{msg['label.campos.obrigatorios']}" />
+			</h6>
+
+			<p:messages autoUpdate="true" globalOnly="true" closable="true" />
+
+			<p:wizard widgetVar="wiz" nextLabel="#{msg['btn.avancar']}"
+				backLabel="#{msg['btn.voltar']}" showStepStatus="true"
+				step="#{movimentacaoPrestadorPreCadastroBean.currentStep}"
+				flowListener="#{movimentacaoPrestadorPreCadastroBean.onFlowProcess}">
+
+				<!-- Tab de dados pessoais -->
+				<ui:include
+					src="/pages/MovimentacaoPrestadorPreCadastro/MovimentacaoEdit_PreCadastroDadosPessoais.xhtml" />
+
+				<!-- Tab de Endereço residencial -->
+				<ui:include
+					src="/pages/MovimentacaoPrestadorPreCadastro/MovimentacaoEdit_PreCadastroEndResidencial.xhtml" />
+
+				<!-- Tab de Endereço residencial -->
+				<ui:include
+					src="/pages/MovimentacaoPrestadorPreCadastro/MovimentacaoEdit_PreCadastroEspecialidade.xhtml" />
+
+				<!-- Tab de anexos-->
+				<ui:include
+					src="/pages/MovimentacaoPrestadorPreCadastro/MovimentacaoEdit_PreCadastroParcelasCotasPartes.xhtml" />
+
+				<!-- Tab de anexos-->
+				<ui:include
+					src="/pages/MovimentacaoPrestadorPreCadastro/MovimentacaoEdit_PreCadastroAnexos.xhtml" />
+
+			</p:wizard>
+
+		</o:form>
+
+		<!--        ADICIONA A MODAL DE TEXTO INTRODUTORIO-->
+		<!-- 		<f:metadata> -->
+		<!-- 			<f:viewAction action="PF('msgIntrodutoriaDialog').show();" -->
+		<!-- 				onPostback="true" /> -->
+		<!-- 		</f:metadata> -->
+
+		<!-- 		DIALOG COM O TEXTO INTRODUTORIO -->
+		<p:dialog id="msgIntrodutoriaDialog" widgetVar="msgIntrodutoriaDialog"
+			header="#{msg['texto.introdutorio.head']}" modal="true"
+			responsive="true" position="center" closeOnEscape="true"
+			resizable="false">
+			<p:panelGrid columns="1" layout="grid" style="text-align: left;">
+				<h:outputText
+					value="#{movimentacaoPrestadorPreCadastroBean.verificarMensagemTextoIntrodutorio()}"
+					escape="false" style="white-space: pre-line; text-align: left;" />
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid"
+				id="gridFooterTextoIntrodutorio">
+				<p:commandButton oncomplete="PF('msgIntrodutoriaDialog').hide()"
+					value="#{msg['btn.ok']}" />
+			</p:panelGrid>
+		</p:dialog>
+
+		<!-- 		DIALOG COM A LISTA DE LOGRADOUROS -->
+		<p:dialog id="listaLogradouros" widgetVar="itemLogradouros"
+			responsive="true"
+			header="#{msg['label.dialog.selecione.logradouro']}"
+			closeOnEscape="false" modal="true" position="center">
+			<h:form id="formDialogEnderecoResidencial">
+				<p:panelGrid layout="grid" id="gridPesquisaLogradouro" columns="1">
+					<h:panelGrid>
+						<h:outputText value="#{msg['informativo.help.cep']}"
+							style="font-weight: bold;font-size: 13px" />
+					</h:panelGrid>
+
+					<!-- 						    CEP -->
+					<h:panelGrid id="idPesquisaCep" style="text-align:left">
+						<p:outputLabel for="cepPesquisa"
+							value="#{msg['movimentacaoPrestadorEndereco.cep']}" />
+						<h:panelGrid columns="2" width="5%">
+							<p:inputMask id="cepPesquisa" required="true"
+								title="#{msg['movimentacaoPrestadorEndereco.cep.msg']}"
+								value="#{movimentacaoPrestadorPreCadastroBean.cepPesquisa}"
+								style="width:43%; min-width:68px" mask="99999-999">
+
+							</p:inputMask>
+							<p:commandButton icon="fa fa-search"
+								action="#{movimentacaoPrestadorPreCadastroBean.onChangeCep()}"
+								update="tabelaLogradouros, idPesquisaCep " />
+						</h:panelGrid>
+						<p:message id="msgCep" for="cepPesquisa" display="text" />
+					</h:panelGrid>
+
+					<!-- 					LISTA DE LOGRADOUROS		 -->
+					<p:dataTable rows="5" id="tabelaLogradouros" style="margin-top:1%"
+						emptyMessage="#{msg['informativo.logradouro.vazio']}"
+						reflow="true"
+						value="#{movimentacaoPrestadorPreCadastroBean.logradourosList}"
+						paginator="true" paginatorPosition="bottom" var="logradouro">
+
+						<p:column headerText="#{msg['movimentacaoPrestadorEndereco.cep']}"
+							width="9%">
+							<h:outputText value="#{logradouro.cep}" />
+						</p:column>
+
+						<p:column
+							headerText="#{msg['movimentacaoPrestadorEndereco.logradouro']}"
+							filterPosition="bottom" filterBy="#{logradouro.logradouro}"
+							width="150" filterStyle="width: 95%" filterMaxLength="30"
+							filterMatchMode="contains">
+							<h:outputText value="#{logradouro.logradouro}" />
+						</p:column>
+
+						<p:column
+							headerText="#{msg['movimentacaoPrestadorEndereco.bairro']}"
+							width="10%">
+							<h:outputText value="#{logradouro.bairro}" />
+						</p:column>
+
+						<p:column
+							headerText="#{msg['movimentacaoPrestadorEndereco.municipio']}"
+							width="10%">
+							<h:outputText value="#{logradouro.municipio.nome}" />
+						</p:column>
+
+						<p:column
+							headerText="#{msg['movimentacaoPrestadorEndereco.estado']}"
+							width="5%">
+							<h:outputText value="#{logradouro.estado.sigla}" />
+						</p:column>
+
+						<p:column headerText="#{msg['label.selecione']}" width="10%">
+							<p:commandButton icon="fa fa-check"
+								action="#{movimentacaoPrestadorPreCadastroBean.adicionaItemLogradouro()}"
+								update="panelEndereco"
+								oncomplete="PF('itemLogradouros').hide();">
+								<f:setPropertyActionListener
+									target="#{movimentacaoPrestadorPreCadastroBean.logradouroItem}"
+									value="#{logradouro}" />
+							</p:commandButton>
+						</p:column>
+
+					</p:dataTable>
+					<p:commandButton value="#{msg['btn.fechar']}" icon="fa fa-close"
+						oncomplete="PF('itemLogradouros').hide();" />
+				</p:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<!-- 		DIALOG CONCLUSAO DE CADASTRO -->
+		<p:dialog id="concluirCadastro" modal="true" appendTo="@(body)"
+			widgetVar="concluirCadastro" responsive="true"
+			header="#{msg['informativo.conclusaoCadastro']}" resizable="false"
+			closable="false" position="center">
+			<h:form id="formDialogConclusao">
+				<p:panelGrid layout="grid" columns="1">
+					<h:outputText value="#{msg['informativo.concluido.sucesso']}"
+						escape="false" style="white-space: pre-line; text-align: left;" />
+				</p:panelGrid>
+				<p:commandButton value="#{msg['btn.ok']}"
+					update="@form, msgIntrodutoriaDialog"
+					action="#{movimentacaoPrestadorPreCadastroBean.cadastroConcluido()}"
+					style="margin-top:4%" oncomplete="PF('concluirCadastro').hide();" />
+			</h:form>
+		</p:dialog>
+
+		<script>
+			function converteMaiuscula(campo) {
+				var str = campo.value;
+				if (str.indexOf("*") != -1 || str.indexOf(",") != -1) {
+					str = str.substring(0, (str.length - 1));
+				}
+				campo.value = str.toUpperCase();
+			}
+		</script>
+
+		<br />
+	</ui:define>
+</ui:composition>

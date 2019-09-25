@@ -1,0 +1,77 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+
+	<!-- Tab de dependentes -->
+	<p:tab id="camposDependente"
+		title="#{msg['movimentacao.prestador.campo.dependente']}">
+
+		<p:panel header="#{msg['movimentacao.prestador.campo.dependente']}">
+
+			<p:dataTable rows="12" id="tabelaDependentesCampos"
+				style="margin-top:1%"
+				emptyMessage="#{msg['informativo.nenhum.resultado']}" reflow="true"
+				value="#{movimentacaoPrestadorCampoBean.camposPrestadorDependentesList}"
+				paginator="true" paginatorPosition="bottom" var="_dependente">
+
+				<!-- CAMPO -->
+				<p:column headerText="#{msg['movimentacao.prestador.campo.campo']}"
+					colspan="2" styleClass="alignLeft">
+					<h:outputText value="#{_dependente.campoNome}" />
+				</p:column>
+
+				<!-- LEGENDA -->
+				<p:column styleClass="alignLeft"
+					headerText="#{msg['movimentacao.prestador.campo.legenda']}"
+					colspan="3">
+					<h:outputText value="#{_dependente.legenda}" />
+				</p:column>
+
+				<!-- ANEXO -->
+				<p:column headerText="#{msg['movimentacao.prestador.campo.anexo']}">
+					<p:selectBooleanCheckbox id="campoDependenteAnexo"
+						value="#{_dependente.anexo}" disabled="true" />
+				</p:column>
+
+				<!-- ANALISE -->
+				<p:column
+					headerText="#{msg['movimentacao.prestador.campo.analise']}">
+					<p:selectBooleanCheckbox id="campoDependenteAnalise"
+						value="#{_dependente.analise}" disabled="true" />
+				</p:column>
+
+				<!--  OBRIGATORIO -->
+				<p:column
+					headerText="#{msg['movimentacao.prestador.campo.obrigatorio']}">
+					<p:selectBooleanCheckbox id="campoDependenteObrigatorio"
+						value="#{_dependente.obrigatorio}" disabled="true" />
+				</p:column>
+
+				<!-- DESATIVAR -->
+				<p:column
+					headerText="#{msg['movimentacao.prestador.campo.desativar']}">
+					<p:selectBooleanCheckbox id="campoDependenteDesativar"
+						value="#{_dependente.disable}" disabled="true" />
+				</p:column>
+
+				<!-- AÇÕES -->
+				<p:column headerText="#{msg['label.acao']}" colspan="1">
+
+					<!-- EDITAR -->
+					<p:commandButton icon="fa fa-fw fa-edit"
+						rendered="#{not empty movimentacaoPrestadorCampoBean.camposPrestadorDependentesList}"
+						oncomplete="PF('campoDialog').show();" update=":formDialogCampos">
+						<f:setPropertyActionListener
+							target="#{movimentacaoPrestadorCampoBean.movimentacaoPrestadorCampo}"
+							value="#{_dependente}" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+		</p:panel>
+	</p:tab>
+</ui:composition>
